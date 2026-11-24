@@ -1,6 +1,6 @@
+import {inlineCopyToPlainText} from '@vexl-next/website-utils/src/inlineCopy'
 import {Array, Option, pipe} from 'effect'
 import {type CopyKey} from '../../copy/copyFiles'
-import {inlineCopyToPlainText} from '../../copy/inlineCopy'
 import {type PageCopy} from '../../copy/pageCopy'
 import {type Locale} from '../../i18n/locales'
 

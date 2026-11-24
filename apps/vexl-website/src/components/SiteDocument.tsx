@@ -13,8 +13,17 @@ import {AnchorScroll} from './AnchorScroll'
  */
 async function DevCopyEditor(): Promise<React.ReactNode> {
   if (process.env.NODE_ENV === 'development') {
-    const {CopyEditor} = await import('../copyEditor/CopyEditor')
-    return <CopyEditor copy={copyPages} />
+    const [{CopyEditor}, {saveCopy}] = await Promise.all([
+      import('@vexl-next/website-utils/src/copyEditor/CopyEditor'),
+      import('../copyEditor/saveCopy'),
+    ])
+    return (
+      <CopyEditor
+        copy={copyPages}
+        save={saveCopy}
+        storageKey="vexl-website-copy-editor"
+      />
+    )
   }
   return null
 }

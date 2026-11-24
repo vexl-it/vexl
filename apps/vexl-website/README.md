@@ -22,7 +22,8 @@ Against the production content-service (no backend needed):
 pnpm --filter vexl-website dev:prod-data
 ```
 
-On a new machine or cloud environment, `scripts/setup.sh` installs only the
+On a new machine or cloud environment,
+`packages/website-utils/scripts/setup.sh vexl-website` installs only the
 website's part of the monorepo and the browser the `screenshots` script uses.
 
 ```sh
@@ -64,7 +65,7 @@ Weglot translated.
   page calls `notFound()`, so `proxy.ts` rewrites unknown post slugs and page
   numbers to an unmatched URL before they reach their route.
 - **Content Security Policy.** `proxy.ts` runs on every request and sends
-  the two policies from `src/contentSecurityPolicy.ts`. One carries a fresh
+  the two policies from `packages/website-utils/src/securityHeaders.ts`. One carries a fresh
   nonce, which Next puts on its inline scripts, so every page renders per
   request. The other only allows scripts from our origin, because Next puts
   the nonce on external `<Script>`s too. Scripts, images, frames and
@@ -109,7 +110,7 @@ To change copy:
    FAQ answer.
 3. Click a text. The panel shows its key with the English and Czech value side
    by side, whichever language you are viewing. Change both and click **Save
-   both languages**. The page reloads with the change.
+   all languages**. The page reloads with the change.
 4. Page titles and descriptions aren't on the page: open **Edits** and pick
    them under **Page meta**. The same list shows unsaved edits and everything
    you saved in this tab.

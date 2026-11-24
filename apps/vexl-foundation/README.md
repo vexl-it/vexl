@@ -12,7 +12,8 @@ The site is a single English page with no backend dependencies.
 pnpm --filter vexl-foundation dev
 ```
 
-On a new machine or cloud environment, `scripts/setup.sh` installs only
+On a new machine or cloud environment,
+`packages/website-utils/scripts/setup.sh vexl-foundation` installs only
 vexl-foundation's part of the monorepo and the browser the `screenshots` script
 uses.
 
@@ -37,7 +38,7 @@ Next.js server on port 3000.
   Next.js itself (and the dev-only copy editor under `next dev`).
 - **Links** are plain `<a>` tags, matching Webflow.
 - **Content Security Policy.** `proxy.ts` runs on every request and sends the
-  two policies from `src/contentSecurityPolicy.ts`. One carries a fresh nonce,
+  two policies from `packages/website-utils/src/securityHeaders.ts`. One carries a fresh nonce,
   which Next puts on its inline scripts, so every page renders per request. The
   other only allows scripts from our origin, because Next puts the nonce on
   external `<Script>`s too. Scripts, images, frames and connections to any

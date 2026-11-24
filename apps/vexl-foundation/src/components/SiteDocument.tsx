@@ -1,3 +1,4 @@
+import {Record} from 'effect'
 import {connection} from 'next/server'
 import React from 'react'
 import {copyPages} from '../copy/copyFiles'
@@ -11,8 +12,17 @@ import '../styles/webflow.css'
  */
 async function DevCopyEditor(): Promise<React.ReactNode> {
   if (process.env.NODE_ENV === 'development') {
-    const {CopyEditor} = await import('../copyEditor/CopyEditor')
-    return <CopyEditor copy={copyPages} />
+    const [{CopyEditor}, {saveCopy}] = await Promise.all([
+      import('@vexl-next/website-utils/src/copyEditor/CopyEditor'),
+      import('../copyEditor/saveCopy'),
+    ])
+    return (
+      <CopyEditor
+        copy={Record.map(copyPages, (values) => ({en: values}))}
+        save={saveCopy}
+        storageKey="vexl-foundation-copy-editor"
+      />
+    )
   }
   return null
 }

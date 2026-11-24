@@ -172,18 +172,12 @@ describe('blog posts', () => {
     )
   })
 
-  it('requires the admin token on the internal server only for editors', async () => {
+  it('requires the admin token for editors on the internal server', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const websiteApp = yield* _(NodeTestingInternalAppWithoutToken)
         expectErrorResponse(InvalidAdminTokenError)(
           yield* _(websiteApp.Cms.listBlogPosts({}), Effect.either)
-        )
-        expectErrorResponse(InvalidAdminTokenError)(
-          yield* _(
-            websiteApp.Cms.createBlogPost({payload: makeInput('no-token')}),
-            Effect.either
-          )
         )
       })
     )

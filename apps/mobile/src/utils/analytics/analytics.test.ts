@@ -227,6 +227,27 @@ describe('applyJourneyStep', () => {
     expect(next).toEqual({...current, closed: true})
   })
 
+  it('counts the lifetime from the exact start, not from the start day', () => {
+    const started = openOnboarding()
+    const stepAt = (now: Date): AnalyticsInstance =>
+      Option.getOrThrow(
+        applyJourneyStep({
+          definition: testJourney,
+          current: Option.some(started),
+          partial: {step: 'registered'},
+          now,
+          newId,
+        })
+      )
+
+    expect(stepAt(new Date('2026-09-28T09:59:00Z'))).toMatchObject({
+      updatedDay: '2026-09-28',
+      payload: {step: 'registered'},
+      closed: false,
+    })
+    expect(stepAt(nextMonday)).toEqual({...started, closed: true})
+  })
+
   it('rejects a state the definition schema does not accept', () => {
     const next = applyJourneyStep({
       definition: testJourney,

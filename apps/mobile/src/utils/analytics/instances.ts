@@ -33,12 +33,18 @@ export type AggregationDefinitionOf<S, I> = WithState<
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
+function daysPassedSince(start: number, days: number, now: Date): boolean {
+  return start + days * DAY_MS <= now.getTime()
+}
+
+/** Counted from the exact local start, so a late start keeps its full lifetime. */
 function lifetimePassed(
-  startDay: DayString,
+  journey: AnalyticsInstance,
   lifetimeDays: number,
   now: Date
 ): boolean {
-  return Date.parse(startDay) + lifetimeDays * DAY_MS <= now.getTime()
+  const start = journey.startedAt ?? Date.parse(journey.startDay)
+  return daysPassedSince(start, lifetimeDays, now)
 }
 
 /** Journeys past their lifetime and aggregation buckets whose period ended. */
@@ -46,7 +52,7 @@ export function isExpired(instance: AnalyticsInstance, now: Date): boolean {
   const definition = analyticsDefinitions[instance.name]
   if (definition === undefined) return true
   if (definition.kind === 'journey')
-    return lifetimePassed(instance.startDay, definition.lifetimeDays, now)
+    return lifetimePassed(instance, definition.lifetimeDays, now)
   return bucketStartDay(definition.period, now) > instance.startDay
 }
 
@@ -101,7 +107,7 @@ export function applyJourneyStep<S extends object, I>({
 }): Option.Option<AnalyticsInstance> {
   if (
     Option.isSome(current) &&
-    lifetimePassed(current.value.startDay, definition.lifetimeDays, now)
+    lifetimePassed(current.value, definition.lifetimeDays, now)
   )
     return Option.some({...current.value, closed: true})
 
@@ -240,7 +246,7 @@ function isTooOldToUpload(instance: AnalyticsInstance, now: Date): boolean {
     defaultAnalyticsWindow
   )
   // The server still accepts uploads on day `startDay + maxAgeDays`.
-  return lifetimePassed(instance.startDay, maxAgeDays + 1, now)
+  return daysPassedSince(Date.parse(instance.startDay), maxAgeDays + 1, now)
 }
 
 /** Drops settled expired entries and any the server would refuse. */

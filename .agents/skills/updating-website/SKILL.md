@@ -13,10 +13,10 @@ This skill covers two sites — pick the one they want to change (`<app>` below)
 read `apps/<app>/AGENTS.md` first (it applies in full), and keep your edits
 inside `apps/<app>/`:
 
-| Site              | `<app>`           | Dev command                                 | Languages                 |
-| ----------------- | ----------------- | ------------------------------------------- | ------------------------- |
-| `vexl.it`         | `vexl-website`    | `pnpm --filter vexl-website dev:prod-data`  | English (`/`) + Czech (`/cs`) |
-| `vexl.foundation` | `vexl-foundation` | `pnpm --filter vexl-foundation dev`         | English only (`/`)        |
+| Site              | `<app>`           | Dev command                                | Languages                     |
+| ----------------- | ----------------- | ------------------------------------------ | ----------------------------- |
+| `vexl.it`         | `vexl-website`    | `pnpm --filter vexl-website dev:prod-data` | English (`/`) + Czech (`/cs`) |
+| `vexl.foundation` | `vexl-foundation` | `pnpm --filter vexl-foundation dev`        | English only (`/`)            |
 
 ## Steps
 

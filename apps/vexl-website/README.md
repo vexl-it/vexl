@@ -98,6 +98,10 @@ Weglot translated.
   files; change them through an agent.
 - `public/wf/`: every image, font and PDF from the Webflow CDN. Post and event
   images are on `https://resources.vexl.it`.
+- `public/wf/brand/`: the brand manual's (`/brand`) logos, fonts, photos and
+  downloads. The manual's colors mirror `packages/ui`'s tokens: when those
+  change, update `src/views/brand/Colors.tsx` and the files in
+  `public/wf/brand/colors`.
 
 The old Webflow pagination URLs (`/blog?27a9a69d_page=2`,
 `/community?534aadfb_page=2`) redirect to `/blog/page/2` and

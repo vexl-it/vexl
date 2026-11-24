@@ -1,0 +1,54 @@
+{
+  "yellow": {
+    "hex": "#FCCD6C",
+    "rgb": [252, 205, 108]
+  },
+  "black": {
+    "hex": "#000000",
+    "rgb": [0, 0, 0]
+  },
+  "white": {
+    "hex": "#FFFFFF",
+    "rgb": [255, 255, 255]
+  },
+  "light-yellow": {
+    "hex": "#FFE1A2",
+    "rgb": [255, 225, 162]
+  },
+  "gold": {
+    "hex": "#BE8821",
+    "rgb": [190, 136, 33]
+  },
+  "dark-yellow": {
+    "hex": "#4C3E20",
+    "rgb": [76, 62, 32]
+  },
+  "light-green": {
+    "hex": "#ACD9B7",
+    "rgb": [172, 217, 183]
+  },
+  "dark-green": {
+    "hex": "#455749",
+    "rgb": [69, 87, 73]
+  },
+  "light-pink": {
+    "hex": "#FCC5F3",
+    "rgb": [252, 197, 243]
+  },
+  "dark-pink": {
+    "hex": "#654F61",
+    "rgb": [101, 79, 97]
+  },
+  "light-red": {
+    "hex": "#EE675E",
+    "rgb": [238, 103, 94]
+  },
+  "dark-red": {
+    "hex": "#A0433C",
+    "rgb": [160, 67, 60]
+  },
+  "almost-black": {
+    "hex": "#333333",
+    "rgb": [51, 51, 51]
+  }
+}

@@ -1,0 +1,839 @@
+/* The brand manual pages, built on webflow.css's colors, type and cards */
+.brand-main {
+  padding-bottom: 4em;
+}
+
+/* webflow.css sets TT Satoshi on every p and a */
+.brand-card_title,
+.brand-rule,
+.brand-specimen.is-monument p,
+.brand-milestone_date {
+  font-family:
+    Monument Extended,
+    sans-serif;
+  font-weight: 700;
+}
+
+.brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5em;
+  padding-top: 10em;
+  padding-bottom: 2em;
+}
+
+.brand-eyebrow {
+  color: var(--gold);
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 0.75em;
+  text-decoration: none;
+}
+
+a.brand-eyebrow:hover {
+  text-decoration: underline;
+}
+
+.brand-title {
+  max-width: 14em;
+  margin: 0;
+}
+
+.brand-lead,
+.brand-text {
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.brand-lead {
+  max-width: 32em;
+  color: var(--white);
+  font-size: 1.35rem;
+}
+
+.brand-text {
+  font-size: 1.05rem;
+}
+
+.brand-text a {
+  color: inherit;
+}
+
+.brand-text.is-muted {
+  color: var(--grey);
+}
+
+.brand-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-top: 1em;
+}
+
+.brand-nav_link {
+  color: var(--white);
+  border: 1px solid #ffffff40;
+  border-radius: 100px;
+  padding: 0.6em 1.1em;
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.brand-nav_link:hover {
+  background-color: #ffffff14;
+}
+
+.brand-nav_link[aria-current='page'] {
+  background-color: var(--gold);
+  border-color: var(--gold);
+  color: var(--black);
+}
+
+.brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  padding-top: 4em;
+  padding-bottom: 2em;
+}
+
+.brand-block_head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1em 4em;
+  align-items: end;
+}
+
+.brand-block_title {
+  margin: 0;
+}
+
+.brand-block_text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+}
+
+.brand-cards,
+.brand-downloads,
+.brand-gallery,
+.brand-swatches,
+.brand-misuses,
+.brand-people,
+.brand-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.brand-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1em;
+}
+
+.brand-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr auto;
+  gap: 2em 1em;
+  height: 100%;
+  min-height: 16em;
+  border-radius: 24px;
+  padding: 2em;
+  color: var(--black);
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.brand-card:hover {
+  transform: translateY(-4px);
+}
+
+.brand-card.is-yellow {
+  background-color: var(--gold);
+}
+
+.brand-card.is-green {
+  background-color: var(--dark-sea-green);
+}
+
+.brand-card.is-pink {
+  background-color: var(--thistle);
+}
+
+.brand-card.is-dark {
+  background-color: var(--dark-slate-green);
+  color: var(--white);
+}
+
+.brand-card_number {
+  grid-column: 1 / -1;
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+.brand-card_body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.75em;
+}
+
+.brand-card_title {
+  display: block;
+  color: inherit;
+  font-size: 2em;
+}
+
+.brand-card_text {
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.brand-card_arrow {
+  align-self: end;
+  width: 1.75em;
+  height: 1.75em;
+}
+
+.brand-rule {
+  margin: 0;
+}
+
+.brand-rule strong {
+  background-color: var(--gold);
+  color: var(--black);
+  padding: 0 0.15em;
+}
+
+.brand-downloads {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.5em;
+}
+
+.brand-download {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  height: 100%;
+  color: var(--white);
+  border: 1px solid #ffffff33;
+  border-radius: 16px;
+  padding: 1em 1.25em;
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.brand-download:hover {
+  background-color: #ffffff14;
+}
+
+.brand-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1em;
+}
+
+.brand-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  border-radius: 24px;
+  margin: 0;
+}
+
+.brand-tile.is-light {
+  background-color: var(--white);
+}
+
+.brand-tile.is-dark {
+  background-color: var(--black-ish);
+}
+
+.brand-tile_logo {
+  width: 70%;
+  max-height: 60%;
+}
+
+.brand-tile_icon {
+  width: 40%;
+  border-radius: 22%;
+}
+
+.brand-tile_caption {
+  position: absolute;
+  left: 1.25em;
+  right: 1.25em;
+  bottom: 1em;
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  color: var(--grey);
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.brand-tile_formats {
+  display: flex;
+  gap: 0.75em;
+}
+
+.brand-tile_formats a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-tile_formats a:hover {
+  color: var(--gold);
+}
+
+.brand-tile.is-light .brand-tile_formats a:hover {
+  color: var(--black);
+}
+
+.brand-clear-space {
+  outline: 2px dashed #ee675e;
+}
+
+.brand-misuses {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1em;
+}
+
+.brand-misuse {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.brand-misuse_preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  border-radius: 24px;
+  background-color: var(--white);
+  overflow: hidden;
+}
+
+.brand-misuse_preview::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -10%;
+  width: 120%;
+  height: 3px;
+  background-color: #ee675e;
+  rotate: -25deg;
+}
+
+.brand-misuse_logo {
+  width: 70%;
+}
+
+.brand-misuse_logo.is-shadow {
+  filter: drop-shadow(6px 8px 4px #00000080);
+}
+
+.brand-misuse_logo.is-rotate {
+  rotate: -15deg;
+}
+
+.brand-misuse_logo.is-recolor {
+  filter: invert(48%) sepia(80%) saturate(2000%) hue-rotate(190deg);
+}
+
+.brand-misuse_logo.is-deform {
+  scale: 1.3 0.7;
+}
+
+.brand-contrast {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 0.5em;
+}
+
+.brand-contrast_tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  border: 1px solid #ffffff1f;
+}
+
+.brand-contrast_tile img {
+  width: 70%;
+}
+
+.brand-contrast_hex {
+  color: var(--black);
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.brand-contrast_hex.is-on-dark {
+  color: var(--white);
+}
+
+.brand-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 1em;
+}
+
+.brand-swatch {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 3em;
+  min-height: 15em;
+  border-radius: 24px;
+  border: 1px solid #ffffff1f;
+  padding: 1.5em;
+  color: var(--black);
+}
+
+.brand-swatch.is-dark {
+  color: var(--white);
+}
+
+.brand-swatch_name {
+  margin: 0;
+  font-size: 1.5em;
+  line-height: 1.2;
+}
+
+.brand-swatch_values {
+  margin: 0;
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.brand-swatch_row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  border-top: 1px solid currentColor;
+  padding: 0.4em 0;
+}
+
+.brand-swatch_row dd {
+  margin: 0;
+  user-select: all;
+}
+
+.brand-typeface {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1em;
+}
+
+.brand-specimen {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2em;
+  border-radius: 24px;
+  background-color: var(--gold);
+  color: var(--black);
+  padding: 2em;
+}
+
+.brand-specimen.is-satoshi {
+  background-color: var(--dark-sea-green);
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-weight: 500;
+}
+
+.brand-specimen p {
+  margin: 0;
+}
+
+.brand-specimen_large {
+  font-size: 6em;
+  line-height: 1;
+}
+
+.brand-specimen_glyphs {
+  font-size: 1.25em;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.brand-specimen .brand-eyebrow {
+  display: block;
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  color: inherit;
+  opacity: 0.6;
+}
+
+.brand-facts {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border-radius: 24px;
+  background-color: var(--black-ish);
+  padding: 2em;
+  font-family:
+    TT Satoshi,
+    sans-serif;
+}
+
+.brand-facts > div {
+  border-bottom: 1px solid #ffffff1f;
+  padding: 1em 0;
+}
+
+.brand-facts > div:first-child {
+  padding-top: 0;
+}
+
+.brand-facts > div:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.brand-facts dt {
+  color: var(--grey);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.4em;
+}
+
+.brand-facts dd {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.brand-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 1em;
+}
+
+.brand-gallery.is-photos {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+}
+
+.brand-gallery.is-photos img {
+  object-fit: cover;
+}
+
+.brand-gallery.is-avatars {
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+}
+
+.brand-gallery_item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 10;
+  border-radius: 16px;
+  background-color: var(--black-ish);
+  overflow: hidden;
+}
+
+.brand-gallery.is-avatars .brand-gallery_item {
+  aspect-ratio: 1;
+  background-color: transparent;
+}
+
+.brand-gallery_item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-gallery_download {
+  position: absolute;
+  right: 0.75em;
+  bottom: 0.75em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  border-radius: 8px;
+  background-color: var(--gold);
+  color: var(--black);
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.brand-gallery_item:hover .brand-gallery_download,
+.brand-gallery_item:focus-visible .brand-gallery_download {
+  opacity: 1;
+}
+
+.brand-people {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1em;
+}
+
+.brand-person {
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background-color: var(--black-ish);
+  overflow: hidden;
+  scroll-margin-top: 6em;
+}
+
+.brand-person_photo {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background-color: var(--gold);
+}
+
+.brand-person_body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.75em;
+  padding: 1.5em 2em 2em;
+}
+
+.brand-person_name {
+  font-family: inherit;
+  font-size: 1.5em;
+  font-weight: 700;
+}
+
+.brand-person_role {
+  color: var(--gold);
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.brand-person_links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em 1.25em;
+  margin-top: auto;
+  padding-top: 0.75em;
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.brand-person_links a {
+  color: var(--white);
+}
+
+.brand-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75em;
+}
+
+.brand-actions > a {
+  width: auto;
+  padding: 1em 2em;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.brand-statement {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  max-width: 48em;
+  border-radius: 24px;
+  background-color: var(--black-ish);
+  padding: 2.5em;
+}
+
+.brand-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.brand-milestone {
+  display: grid;
+  grid-template-columns: 16em 1fr;
+  gap: 2em;
+  border-radius: 24px;
+  background-color: var(--black-ish);
+  padding: 2em;
+}
+
+.brand-milestone_date {
+  color: var(--gold);
+  font-size: 1.4em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.brand-milestone_title {
+  font-family: inherit;
+  font-size: 1.5em;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+}
+
+.brand-help {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25em;
+  max-width: 40em;
+  border-radius: 24px;
+  background-color: var(--gold);
+  color: var(--black);
+  padding: 3em;
+}
+
+.brand-help_glasses {
+  width: 8em;
+  margin: -1.5em 0 -1em -1.5em;
+}
+
+.brand-help_button {
+  border-radius: 16px;
+  background-color: var(--black);
+  color: var(--white);
+  padding: 1em 2em;
+  font-family:
+    TT Satoshi,
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media screen and (max-width: 991px) {
+  .brand-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .brand-misuses {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .brand-typeface {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .brand-header {
+    padding-top: 8rem;
+  }
+
+  .brand-title {
+    font-size: 3em;
+  }
+
+  .brand-lead {
+    font-size: 1.15rem;
+  }
+
+  .brand-downloads {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .brand-nav {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.5em;
+  }
+
+  .brand-block_head {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-card {
+    min-height: 12em;
+  }
+
+  .brand-rule {
+    font-size: 2.25em;
+  }
+
+  .brand-specimen_large {
+    font-size: 4em;
+  }
+
+  .brand-milestone {
+    grid-template-columns: 1fr;
+    gap: 0.5em;
+  }
+
+  .brand-help,
+  .brand-statement {
+    padding: 2em;
+  }
+}

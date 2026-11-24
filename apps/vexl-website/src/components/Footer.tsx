@@ -1,3 +1,4 @@
+import {isExternalHref} from '@vexl-next/website-utils/src/inlineCopy'
 import React from 'react'
 import {type CopyKey} from '../copy/copyFiles'
 import {pageCopy} from '../copy/pageCopy'
@@ -25,7 +26,7 @@ const socialLinks = [
     text: 'footer.nostr.text',
   },
   {
-    href: 'https://vex-it-website-v2.vercel.app/brand',
+    href: '/brand',
     icon: '/wf/647dddc883208de4d8e7320a_Kit.svg',
     title: 'footer.brandManual.title',
     text: 'footer.brandManual.text',
@@ -48,10 +49,10 @@ export function Footer({locale}: {readonly locale: Locale}): React.JSX.Element {
           {socialLinks.map((link) => (
             <a
               key={link.href}
-              href={link.href}
-              target="_blank"
               className="footer-box_wrap w-inline-block"
-              rel="noreferrer"
+              {...(isExternalHref(link.href)
+                ? {href: link.href, target: '_blank', rel: 'noreferrer'}
+                : {href: localizedPath(locale, link.href)})}
             >
               <div className="footer-icon_wrap">
                 <img

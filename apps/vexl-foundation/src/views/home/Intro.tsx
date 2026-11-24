@@ -22,7 +22,7 @@ export function Intro({t}: {readonly t: PageCopy<'home'>}): React.JSX.Element {
       <div className="hero-left">
         <div className="glassses-top">
           <img
-            src="/wf/64621595141696732cc27ab1_Sunglasses.svg"
+            src="/wf/646214c4363076eb171c33e1_sunglasses.webp"
             loading="lazy"
             width={97.5}
             alt=""

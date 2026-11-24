@@ -2,7 +2,11 @@ import {type EventInput} from '@vexl-next/domain/src/general/cms'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Array, Effect, Option} from 'effect'
-import {NodeTestingApp, NodeTestingInternalApp} from '../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+  NodeTestingInternalAppWithoutToken,
+} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const input: EventInput = {
@@ -23,11 +27,14 @@ const input: EventInput = {
 
 const publicEventNames = Effect.gen(function* (_) {
   const app = yield* _(NodeTestingApp)
+  const websiteApp = yield* _(NodeTestingInternalAppWithoutToken)
   const {events} = yield* _(app.Cms.getPublishedEvents({}))
   const mobile = yield* _(app.Cms.getEvents({}))
+  const website = yield* _(websiteApp.Website.getPublishedEvents({}))
   expect(mobile.events).toEqual(
     Array.map(events, ({status, ...event}) => event)
   )
+  expect(website.events).toEqual(events)
   return Array.map(events, (one) => one.name)
 })
 

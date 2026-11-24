@@ -1,10 +1,15 @@
 import {BlogSlug, type BlogPostInput} from '@vexl-next/domain/src/general/cms'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {InvalidAdminTokenError} from '@vexl-next/rest-api/src/adminTokenMiddleware'
 import {BlogSlugTakenError} from '@vexl-next/rest-api/src/services/content/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Array, Effect, Option, Order, Schema} from 'effect'
-import {NodeTestingApp, NodeTestingInternalApp} from '../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+  NodeTestingInternalAppWithoutToken,
+} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const makeInput = (slug: string): BlogPostInput => ({
@@ -20,11 +25,14 @@ const makeInput = (slug: string): BlogPostInput => ({
 
 const publicSlugs = Effect.gen(function* (_) {
   const app = yield* _(NodeTestingApp)
+  const websiteApp = yield* _(NodeTestingInternalAppWithoutToken)
   const {blogPosts} = yield* _(app.Cms.getPublishedBlogPosts({}))
   const {articles} = yield* _(app.Cms.getBlogArticles({}))
+  const website = yield* _(websiteApp.Website.getPublishedBlogPosts({}))
   expect(Array.map(articles, (one) => one.slug)).toEqual(
     Array.map(blogPosts, (one) => one.slug)
   )
+  expect(website.blogPosts).toEqual(blogPosts)
   return Array.map(blogPosts, (one) => one.slug)
 })
 
@@ -160,6 +168,23 @@ describe('blog posts', () => {
             (one) => one.slug === 'so-what-is-vexl-anyway'
           ).pipe(Option.map((one) => one.status))
         ).toEqual(Option.some('published'))
+      })
+    )
+  })
+
+  it('requires the admin token on the internal server only for editors', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const websiteApp = yield* _(NodeTestingInternalAppWithoutToken)
+        expectErrorResponse(InvalidAdminTokenError)(
+          yield* _(websiteApp.Cms.listBlogPosts({}), Effect.either)
+        )
+        expectErrorResponse(InvalidAdminTokenError)(
+          yield* _(
+            websiteApp.Cms.createBlogPost({payload: makeInput('no-token')}),
+            Effect.either
+          )
+        )
       })
     )
   })

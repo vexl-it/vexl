@@ -577,6 +577,14 @@ a.brand-eyebrow:hover {
   grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
 }
 
+.brand-gallery.is-hero {
+  grid-template-columns: 1fr;
+}
+
+.brand-gallery.is-screens {
+  grid-template-columns: repeat(5, 1fr);
+}
+
 .brand-gallery_item {
   position: relative;
   display: flex;
@@ -591,6 +599,16 @@ a.brand-eyebrow:hover {
 .brand-gallery.is-avatars .brand-gallery_item {
   aspect-ratio: 1;
   background-color: transparent;
+}
+
+.brand-gallery.is-hero .brand-gallery_item {
+  aspect-ratio: auto;
+  padding: 2em;
+}
+
+.brand-gallery.is-screens .brand-gallery_item {
+  aspect-ratio: 9 / 16;
+  padding: 1em;
 }
 
 .brand-gallery_item img {
@@ -774,6 +792,10 @@ a.brand-eyebrow:hover {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .brand-gallery.is-screens {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .brand-misuses {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -798,6 +820,14 @@ a.brand-eyebrow:hover {
 
   .brand-downloads {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .brand-gallery.is-screens {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .brand-gallery.is-hero .brand-gallery_item {
+    padding: 0.5em;
   }
 
   .brand-nav {

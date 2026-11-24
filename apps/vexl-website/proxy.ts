@@ -39,7 +39,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     // Content-service is down: let the page fail and report it
     () => true
   )
-  return await withSecurityHeaders(
+  return withSecurityHeaders(
     request,
     {
       img: ['https://resources.vexl.it'],

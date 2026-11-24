@@ -53,17 +53,17 @@ export function contentSecurityPolicies(
  * Next puts on the page's scripts, which is also why every page renders per
  * request. `respond` passes the request init on to `NextResponse`.
  */
-export async function withSecurityHeaders(
+export function withSecurityHeaders(
   request: NextRequest,
   external: ExternalSources,
   respond: (init: {
     readonly request: {readonly headers: Headers}
-  }) => NextResponse | Promise<NextResponse>
-): Promise<NextResponse> {
+  }) => NextResponse
+): NextResponse {
   const csp = contentSecurityPolicies(btoa(crypto.randomUUID()), external)
   const headers = new Headers(request.headers)
   headers.set('Content-Security-Policy', csp.withNonce)
-  const response = await respond({request: {headers}})
+  const response = respond({request: {headers}})
   response.headers.set('Content-Security-Policy', csp.enforced)
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')

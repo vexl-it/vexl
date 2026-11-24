@@ -1,3 +1,4 @@
+import {fathomSources} from '@vexl-next/website-utils/src/FathomAnalytics'
 import {withSecurityHeaders} from '@vexl-next/website-utils/src/securityHeaders'
 import {Option} from 'effect'
 import {NextResponse, type NextRequest} from 'next/server'
@@ -42,7 +43,8 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   return withSecurityHeaders(
     request,
     {
-      img: ['https://resources.vexl.it'],
+      ...fathomSources,
+      img: ['https://resources.vexl.it', ...fathomSources.img],
       frame: ['https://www.youtube-nocookie.com'],
     },
     (init) =>

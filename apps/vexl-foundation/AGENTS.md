@@ -33,11 +33,12 @@ When the person you work with is not a developer, follow the
   sections from its existing classes; put the few styles it lacks in
   `src/styles/site.css`.
 - The CSP (`packages/website-utils/src/securityHeaders.ts`, plus the origins
-  `proxy.ts` adds) blocks scripts, images, frames and connections from any
-  other origin. A new origin (analytics, an embed, a
+  `proxy.ts` adds) blocks scripts, images, frames and connections from any other
+  origin. The one analytics origin is Fathom's, which counts visits without
+  cookies (`packages/website-utils/src/FathomAnalytics.tsx`); the privacy policy
+  describes it, so keep the two in sync. A new origin (analytics, an embed, a
   hosted font) means visitors' browsers talk to a third party, which is a
-  privacy decision: raise it with the developers before adding it to the
-  policy.
+  privacy decision: raise it with the developers before adding it to the policy.
 - Pages render per request because of the CSP nonce. HTML must stay uncached
   at Cloudflare, otherwise one visitor's nonce is served to everyone.
 

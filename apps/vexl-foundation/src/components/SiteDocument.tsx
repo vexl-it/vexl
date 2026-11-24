@@ -1,7 +1,9 @@
+import {FathomAnalytics} from '@vexl-next/website-utils/src/FathomAnalytics'
 import {Record} from 'effect'
 import {connection} from 'next/server'
 import React from 'react'
 import {copyPages} from '../copy/copyFiles'
+import {SITE_URL} from '../metadata'
 import '../styles/site.css'
 import '../styles/webflow.css'
 
@@ -45,6 +47,10 @@ export async function SiteDocument({
       <body className={bodyClassName}>
         {children}
         <DevCopyEditor />
+        <FathomAnalytics
+          siteId="TODO_VEXL_FOUNDATION_SITE_ID"
+          siteUrl={SITE_URL}
+        />
       </body>
     </html>
   )

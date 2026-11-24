@@ -38,11 +38,13 @@ Next.js server on port 3000.
   Next.js itself (and the dev-only copy editor under `next dev`).
 - **Links** are plain `<a>` tags, matching Webflow.
 - **Content Security Policy.** `proxy.ts` runs on every request and sends the
-  two policies from `packages/website-utils/src/securityHeaders.ts`. One carries a fresh nonce,
-  which Next puts on its inline scripts, so every page renders per request. The
-  other only allows scripts from our origin, because Next puts the nonce on
-  external `<Script>`s too. Scripts, images, frames and connections to any
-  other origin are blocked, so a new third-party embed needs an entry there.
+  two policies from `packages/website-utils/src/securityHeaders.ts`. One carries
+  a fresh nonce, which Next puts on its inline scripts, so every page renders
+  per request. The other only allows scripts from our origin, because Next puts
+  the nonce on external `<Script>`s too. Scripts, images, frames and connections
+  to any other origin are blocked, so a new third-party embed needs an entry
+  there. Fathom analytics (`FathomAnalytics.tsx` in `packages/website-utils`) is
+  the one already allowed.
 
 ## Content
 

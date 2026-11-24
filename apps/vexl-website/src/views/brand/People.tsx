@@ -1,7 +1,12 @@
 import {Array, pipe} from 'effect'
 import React from 'react'
 import {type CopyKey} from '../../copy/copyFiles'
-import {type BrandCopy, BrandBlock, Gallery} from './BrandPage'
+import {
+  type BrandCopy,
+  BrandBlock,
+  GalleryRows,
+  ScreenReaderText,
+} from './BrandPage'
 import {brandAsset} from './sections'
 
 interface Person {
@@ -9,13 +14,14 @@ interface Person {
   readonly bio?: CopyKey<'brand'>
   readonly slug: string
   readonly name: string
-  readonly linkedin: string
+  readonly linkedin?: string
   readonly x: string
 }
 
 const people: readonly Person[] = [
   {
     role: 'people.viliam.role',
+    bio: 'people.viliam.bio',
     slug: 'viliam-klamarcik',
     name: 'Viliam Klamarčík',
     linkedin: 'https://www.linkedin.com/in/viliamklamarcik/',
@@ -42,7 +48,6 @@ const people: readonly Person[] = [
     bio: 'people.stick.bio',
     slug: 'pavol-rusnak',
     name: 'Pavol "Stick" Rusnák',
-    linkedin: 'https://www.linkedin.com/in/pavolrusnak/',
     x: 'https://x.com/PavolRusnak',
   },
   {
@@ -55,27 +60,37 @@ const people: readonly Person[] = [
   },
 ]
 
+type VibeAlt =
+  | 'pears'
+  | 'boothGame'
+  | 'panel'
+  | 'chaincamp'
+  | 'booth'
+  | 'meetupQuestions'
+  | 'meetupTalk'
+  | 'meetupStage'
+  | 'meetupAudience'
+
+/** Rows of photos, `ratio` is width divided by height. */
 const vibes = [
-  'vexl-xmas',
-  'vexl-btcprague-23',
-  'vexl-chaincamp-22',
-  'vexl-x-sl-meetup-4',
-  'vexl-btcp-24',
-  'vexl-btcprague-2024',
-  'vexl-btcprague-24',
-  'vexl-btcp-2024',
-  'vexl-does-btcprague',
-  'vexl-team-2',
-  'vexl-team',
-  'vexl-btcprague-2024-2',
-  'vexl-meetup-ash',
-  'peer-to-peer',
-  'vexl-x-sl-meetup',
-  'vexl-x-sl-meetup-3',
-  'vexl-btcp',
-  'vexl-promo',
-  'vexl-x-sl-meetup-2',
-]
+  [
+    {file: 'peer-to-peer', alt: 'pears', ratio: 3 / 2},
+    {file: 'vexl-team-2', alt: 'booth', ratio: 2 / 3},
+    {file: 'vexl-btcprague-2024-2', alt: 'boothGame', ratio: 3 / 2},
+  ],
+  [
+    {file: 'vexl-btcprague-2024', alt: 'panel', ratio: 3 / 2},
+    {file: 'vexl-chaincamp-22', alt: 'chaincamp', ratio: 4 / 3},
+    {file: 'vexl-x-sl-meetup', alt: 'meetupAudience', ratio: 3 / 2},
+  ],
+  [
+    {file: 'vexl-x-sl-meetup-2', alt: 'meetupQuestions', ratio: 3 / 2},
+    {file: 'vexl-x-sl-meetup-3', alt: 'meetupTalk', ratio: 3 / 2},
+    {file: 'vexl-x-sl-meetup-4', alt: 'meetupStage', ratio: 3 / 2},
+  ],
+] satisfies ReadonlyArray<
+  ReadonlyArray<{file: string; alt: VibeAlt; ratio: number}>
+>
 
 export function People({t}: {readonly t: BrandCopy}): React.JSX.Element {
   return (
@@ -101,18 +116,22 @@ export function People({t}: {readonly t: BrandCopy}): React.JSX.Element {
                       <p className="brand-text">{t(person.bio)}</p>
                     )}
                     <div className="brand-person_links">
-                      <a
-                        href={person.linkedin}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        LinkedIn ↗
-                      </a>
+                      {person.linkedin === undefined ? null : (
+                        <a
+                          href={person.linkedin}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          LinkedIn
+                          <ScreenReaderText>, {person.name}</ScreenReaderText> ↗
+                        </a>
+                      )}
                       <a href={person.x} target="_blank" rel="noreferrer">
-                        X ↗
+                        X<ScreenReaderText>, {person.name}</ScreenReaderText> ↗
                       </a>
                       <a href={photo} download>
-                        {t('people.downloadPhoto')} ↓
+                        {t('people.downloadPhoto')}
+                        <ScreenReaderText>, {person.name}</ScreenReaderText> ↓
                       </a>
                     </div>
                   </div>
@@ -123,12 +142,14 @@ export function People({t}: {readonly t: BrandCopy}): React.JSX.Element {
         </ul>
       </section>
       <BrandBlock title={t('people.vibes.title')} text={t('people.vibes.text')}>
-        <Gallery
-          variant="photos"
-          images={Array.map(vibes, (file) => ({
-            src: brandAsset(`vibes/${file}.webp`),
-            alt: t.text('people.vibes.alt'),
-          }))}
+        <GalleryRows
+          rows={Array.map(vibes, (row) =>
+            Array.map(row, ({file, alt, ratio}) => ({
+              src: brandAsset(`vibes/${file}.webp`),
+              alt: t.text(`people.vibes.alt.${alt}`),
+              ratio,
+            }))
+          )}
         />
       </BrandBlock>
     </>

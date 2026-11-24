@@ -103,12 +103,15 @@ export function BrandPage({
 
 /** One titled part of a brand page, its title beside or above the content. */
 export function BrandBlock({
+  id,
   eyebrow,
   title,
   text,
   aside,
   children,
 }: {
+  /** The anchor that scrolls to the title */
+  readonly id?: string
   readonly eyebrow?: React.ReactNode
   readonly title: React.ReactNode
   readonly text?: React.ReactNode
@@ -122,7 +125,9 @@ export function BrandBlock({
           {eyebrow === undefined ? null : (
             <p className="brand-eyebrow">{eyebrow}</p>
           )}
-          <h2 className="h3 brand-block_title">{title}</h2>
+          <h2 id={id} className="h3 brand-block_title">
+            {title}
+          </h2>
         </div>
         {text === undefined && aside === undefined ? null : (
           <div className="brand-block_text">
@@ -136,6 +141,15 @@ export function BrandBlock({
   )
 }
 
+/** Text only screen readers announce, e.g. what a repeated link belongs to. */
+export function ScreenReaderText({
+  children,
+}: {
+  readonly children: React.ReactNode
+}): React.JSX.Element {
+  return <span className="brand-sr-only">{children}</span>
+}
+
 export interface Download {
   readonly href: string
   readonly label: React.ReactNode
@@ -143,8 +157,11 @@ export interface Download {
 
 export function DownloadList({
   items,
+  owner,
 }: {
   readonly items: readonly Download[]
+  /** What the files belong to, added to each link's accessible name */
+  readonly owner?: React.ReactNode
 }): React.JSX.Element {
   return (
     <ul className="brand-downloads">
@@ -153,7 +170,12 @@ export function DownloadList({
         Array.map((item) => (
           <li key={item.href}>
             <a href={item.href} download className="brand-download">
-              <span>{item.label}</span>
+              <span>
+                {item.label}
+                {owner === undefined ? null : (
+                  <ScreenReaderText>, {owner}</ScreenReaderText>
+                )}
+              </span>
               <span aria-hidden="true">↓</span>
             </a>
           </li>
@@ -168,6 +190,8 @@ export interface GalleryImage {
   readonly alt: string
   /** A full-size file to download instead of the shown `src` */
   readonly download?: string
+  /** Width divided by height, which sizes the image in a `GalleryRows` row */
+  readonly ratio?: number
 }
 
 /** Images that open full size and can be downloaded. */
@@ -176,7 +200,7 @@ export function Gallery({
   variant,
 }: {
   readonly images: readonly GalleryImage[]
-  readonly variant?: 'avatars' | 'photos' | 'screens' | 'hero'
+  readonly variant?: 'avatars' | 'screens' | 'hero' | 'row'
 }): React.JSX.Element {
   return (
     <ul
@@ -185,7 +209,14 @@ export function Gallery({
       {pipe(
         images,
         Array.map((image) => (
-          <li key={image.src}>
+          <li
+            key={image.src}
+            style={
+              image.ratio === undefined
+                ? undefined
+                : {flexGrow: image.ratio, aspectRatio: image.ratio}
+            }
+          >
             <a
               href={image.download ?? image.src}
               download
@@ -200,5 +231,30 @@ export function Gallery({
         ))
       )}
     </ul>
+  )
+}
+
+/** Rows of images at their own aspect ratios, every image in a row equally tall. */
+export function GalleryRows({
+  rows,
+}: {
+  readonly rows: ReadonlyArray<readonly GalleryImage[]>
+}): React.JSX.Element {
+  return (
+    <div className="brand-gallery-rows">
+      {pipe(
+        rows,
+        Array.map((images) => (
+          <Gallery
+            key={Array.join(
+              Array.map(images, (image) => image.src),
+              ' '
+            )}
+            variant="row"
+            images={images}
+          />
+        ))
+      )}
+    </div>
   )
 }

@@ -66,6 +66,16 @@ a.brand-eyebrow:hover {
 
 .brand-text a {
   color: inherit;
+  text-decoration: underline;
+}
+
+.brand-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .brand-text.is-muted {
@@ -122,6 +132,7 @@ a.brand-eyebrow:hover {
 
 .brand-block_title {
   margin: 0;
+  scroll-margin-top: 6em;
 }
 
 .brand-block_text {
@@ -190,7 +201,7 @@ a.brand-eyebrow:hover {
     sans-serif;
   font-size: 1rem;
   font-weight: 600;
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .brand-card_body {
@@ -302,12 +313,16 @@ a.brand-eyebrow:hover {
   display: flex;
   justify-content: space-between;
   gap: 1em;
-  color: var(--grey);
+  color: #a6a6a6;
   font-family:
     TT Satoshi,
     sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
+}
+
+.brand-tile.is-light .brand-tile_caption {
+  color: #666;
 }
 
 .brand-tile_formats {
@@ -546,7 +561,7 @@ a.brand-eyebrow:hover {
 }
 
 .brand-facts dt {
-  color: var(--grey);
+  color: #a6a6a6;
   font-size: 0.9rem;
   font-weight: 600;
   margin-bottom: 0.4em;
@@ -561,16 +576,22 @@ a.brand-eyebrow:hover {
 
 .brand-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
   gap: 1em;
 }
 
-.brand-gallery.is-photos {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+.brand-gallery-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
 }
 
-.brand-gallery.is-photos img {
-  object-fit: cover;
+.brand-gallery.is-row {
+  display: flex;
+}
+
+.brand-gallery.is-row > li {
+  flex-basis: 0;
+  min-width: 0;
 }
 
 .brand-gallery.is-avatars {
@@ -590,7 +611,7 @@ a.brand-eyebrow:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 16 / 10;
+  border: 1px solid #ffffff33;
   border-radius: 16px;
   background-color: var(--black-ish);
   overflow: hidden;
@@ -598,6 +619,7 @@ a.brand-eyebrow:hover {
 
 .brand-gallery.is-avatars .brand-gallery_item {
   aspect-ratio: 1;
+  border: none;
   background-color: transparent;
 }
 
@@ -615,6 +637,14 @@ a.brand-eyebrow:hover {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.brand-gallery.is-row .brand-gallery_item {
+  height: 100%;
+}
+
+.brand-gallery.is-row .brand-gallery_item img {
+  object-fit: cover;
 }
 
 .brand-gallery_download {
@@ -822,19 +852,24 @@ a.brand-eyebrow:hover {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .brand-downloads > li:only-child {
+    grid-column: 1 / -1;
+  }
+
+  .brand-gallery.is-row {
+    flex-wrap: wrap;
+  }
+
+  .brand-gallery.is-row > li {
+    flex-basis: 100%;
+  }
+
   .brand-gallery.is-screens {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .brand-gallery.is-hero .brand-gallery_item {
     padding: 0.5em;
-  }
-
-  .brand-nav {
-    flex-wrap: nowrap;
-    max-width: 100%;
-    overflow-x: auto;
-    padding-bottom: 0.5em;
   }
 
   .brand-block_head {

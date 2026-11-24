@@ -76,6 +76,7 @@ export function Typography({t}: {readonly t: BrandCopy}): React.JSX.Element {
               {t('typography.downloadText')}
             </p>
             <DownloadList
+              owner={typeface.name}
               items={[
                 {
                   href: brandAsset(`fonts/${typeface.file}-complete.zip`),

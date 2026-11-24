@@ -1,6 +1,11 @@
 import {Array, pipe} from 'effect'
 import React from 'react'
-import {type BrandCopy, BrandBlock, DownloadList} from './BrandPage'
+import {
+  type BrandCopy,
+  BrandBlock,
+  DownloadList,
+  ScreenReaderText,
+} from './BrandPage'
 import {brandAsset} from './sections'
 
 type Version = 'black' | 'white' | 'yellow' | 'twoTone'
@@ -66,6 +71,7 @@ export function Logos({t}: {readonly t: BrandCopy}): React.JSX.Element {
         Array.map((logo) => (
           <BrandBlock
             key={logo.key}
+            id={logo.key}
             title={t(`logos.${logo.key}.name`)}
             text={t(`logos.${logo.key}.text`)}
             aside={
@@ -76,50 +82,55 @@ export function Logos({t}: {readonly t: BrandCopy}): React.JSX.Element {
               </p>
             }
           >
-            <div id={logo.key} className="brand-tiles">
+            <div className="brand-tiles">
               {pipe(
                 logo.versions,
-                Array.map((version) => (
-                  <figure
-                    key={version}
-                    className={`brand-tile ${isOnLight(version) ? 'is-light' : 'is-dark'}`}
-                  >
-                    <img
-                      src={logoFile(logo.file, version, 'svg')}
-                      alt={`${t.text(`logos.${logo.key}.name`)}, ${t.text(`logos.version.${version}`)}`}
-                      className="brand-tile_logo"
-                    />
-                    <figcaption className="brand-tile_caption">
-                      <span className="brand-tile_label">
-                        {t(`logos.version.${version}`)}
-                      </span>
-                      <span className="brand-tile_formats">
-                        {pipe(
-                          logoFormats,
-                          Array.map((format) => (
-                            <a
-                              key={format}
-                              href={logoFile(logo.file, version, format)}
-                              download
-                            >
-                              {format.toUpperCase()} ↓
-                            </a>
-                          ))
-                        )}
-                      </span>
-                    </figcaption>
-                  </figure>
-                ))
+                Array.map((version) => {
+                  const name = `${t.text(`logos.${logo.key}.name`)}, ${t.text(`logos.version.${version}`)}`
+                  return (
+                    <figure
+                      key={version}
+                      className={`brand-tile ${isOnLight(version) ? 'is-light' : 'is-dark'}`}
+                    >
+                      <img
+                        src={logoFile(logo.file, version, 'svg')}
+                        alt={name}
+                        className="brand-tile_logo"
+                      />
+                      <figcaption className="brand-tile_caption">
+                        <span className="brand-tile_label">
+                          {t(`logos.version.${version}`)}
+                        </span>
+                        <span className="brand-tile_formats">
+                          {pipe(
+                            logoFormats,
+                            Array.map((format) => (
+                              <a
+                                key={format}
+                                href={logoFile(logo.file, version, format)}
+                                download
+                              >
+                                {format.toUpperCase()}
+                                <ScreenReaderText>, {name}</ScreenReaderText> ↓
+                              </a>
+                            ))
+                          )}
+                        </span>
+                      </figcaption>
+                    </figure>
+                  )
+                })
               )}
             </div>
           </BrandBlock>
         ))
       )}
       <BrandBlock
+        id="app-icon"
         title={t('logos.appIcon.name')}
         text={t('logos.appIcon.text')}
       >
-        <div id="app-icon" className="brand-tiles">
+        <div className="brand-tiles">
           <figure className="brand-tile is-dark">
             <img
               src={brandAsset('logos/vexl-app-icon.png')}

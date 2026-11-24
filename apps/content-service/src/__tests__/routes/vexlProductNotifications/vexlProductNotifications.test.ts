@@ -6,6 +6,7 @@ import {
 import {PLATFORM_IOS} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
+import {InvalidAdminTokenError} from '@vexl-next/rest-api/src/adminTokenMiddleware'
 import {
   AppSource,
   makeCommonHeaders,
@@ -16,6 +17,7 @@ import {Array, Effect, Either, Option, Schema} from 'effect'
 import {
   NodeTestingApp,
   NodeTestingInternalApp,
+  NodeTestingInternalAppWithoutToken,
 } from '../../utils/NodeTestingApp'
 import {
   enqueuedVexlProductNotifications,
@@ -59,6 +61,28 @@ const makeVexlProductNotification = (args: {
 })
 
 describe('Vexl product notifications', () => {
+  it('rejects creating a notification without the admin token', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingInternalAppWithoutToken)
+        const vexlProductNotification = makeVexlProductNotification({
+          uuid: uuid('8d0f4a52-3a4e-4c0e-9a51-6f3d1c2b7e90'),
+          title: 'No token',
+          date: date('2026-01-01T10:00:00.000Z'),
+        })
+
+        expectErrorResponse(InvalidAdminTokenError)(
+          yield* _(
+            app.VexlProductNotifications.createVexlProductNotification({
+              payload: {vexlProductNotification, issuePushNotification: false},
+            }),
+            Effect.either
+          )
+        )
+      })
+    )
+  })
+
   it('creates and returns a Vexl product notification with action fields for a valid admin token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

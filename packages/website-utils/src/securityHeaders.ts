@@ -2,8 +2,10 @@ import {type NextRequest, type NextResponse} from 'next/server'
 
 /** Origins a site needs beyond its own. */
 export interface ExternalSources {
+  readonly script?: readonly string[]
   readonly img?: readonly string[]
   readonly frame?: readonly string[]
+  readonly connect?: readonly string[]
 }
 
 // React uses eval in dev to rebuild server error stacks
@@ -12,14 +14,16 @@ const devEval = process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''
 const policy = (scriptSources: string, external: ExternalSources): string =>
   [
     "default-src 'self'",
-    `script-src ${scriptSources}${devEval}`,
+    [`script-src ${scriptSources}${devEval}`, ...(external.script ?? [])].join(
+      ' '
+    ),
     // React style props, Next.js runtime styles and Webflow embeds
     "style-src 'self' 'unsafe-inline'",
     ["img-src 'self'", ...(external.img ?? [])].join(' '),
     // webflow.css inlines its icon font as a data URL
     "font-src 'self' data:",
     ...(external.frame ? [['frame-src', ...external.frame].join(' ')] : []),
-    "connect-src 'self'",
+    ["connect-src 'self'", ...(external.connect ?? [])].join(' '),
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

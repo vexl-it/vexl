@@ -31,16 +31,30 @@ describe('contentSecurityPolicies', () => {
     const own = contentSecurityPolicies('abc').withNonce
     expect(directive(own, 'img-src')).toEqual(Option.some("img-src 'self'"))
     expect(directive(own, 'frame-src')).toEqual(Option.none())
+    expect(directive(own, 'connect-src')).toEqual(
+      Option.some("connect-src 'self'")
+    )
 
-    const external = contentSecurityPolicies('abc', {
+    const {withNonce: external, enforced} = contentSecurityPolicies('abc', {
+      script: ['https://script.example'],
       img: ['https://img.example'],
       frame: ['https://frame.example'],
-    }).withNonce
+      connect: ['https://connect.example'],
+    })
+    expect(directive(external, 'script-src')).toEqual(
+      Option.some("script-src 'self' 'nonce-abc' https://script.example")
+    )
+    expect(directive(enforced.split(',')[1] ?? '', 'script-src')).toEqual(
+      Option.some("script-src 'self' 'unsafe-inline' https://script.example")
+    )
     expect(directive(external, 'img-src')).toEqual(
       Option.some("img-src 'self' https://img.example")
     )
     expect(directive(external, 'frame-src')).toEqual(
       Option.some('frame-src https://frame.example')
+    )
+    expect(directive(external, 'connect-src')).toEqual(
+      Option.some("connect-src 'self' https://connect.example")
     )
   })
 })

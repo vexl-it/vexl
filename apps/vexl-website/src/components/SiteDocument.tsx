@@ -1,7 +1,9 @@
+import {FathomAnalytics} from '@vexl-next/website-utils/src/FathomAnalytics'
 import {connection} from 'next/server'
 import React from 'react'
 import {copyPages} from '../copy/copyFiles'
 import {type Locale} from '../i18n/locales'
+import {SITE_URL} from '../metadata'
 import '../styles/site.css'
 import '../styles/webflow.css'
 import {AnchorScroll} from './AnchorScroll'
@@ -49,6 +51,7 @@ export async function SiteDocument({
         {children}
         <AnchorScroll />
         <DevCopyEditor />
+        <FathomAnalytics siteId="TODO_VEXL_IT_SITE_ID" siteUrl={SITE_URL} />
       </body>
     </html>
   )

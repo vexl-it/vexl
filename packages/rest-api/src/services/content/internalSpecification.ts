@@ -22,6 +22,10 @@ import {
   DuplicateVexlProductNotificationUuidError,
   VexlProductNotificationResponse,
 } from './contracts'
+import {
+  GetPublishedBlogPostsEndpoint,
+  GetPublishedEventsEndpoint,
+} from './specification'
 
 export const CreateVexlProductNotificationEndpoint = HttpApiEndpoint.post(
   'createVexlProductNotification',
@@ -131,16 +135,24 @@ const CmsApiGroup = HttpApiGroup.make('Cms')
   .add(PublishEventEndpoint)
   .add(UnpublishEventEndpoint)
   .add(DeleteEventEndpoint)
+  .middleware(AdminTokenMiddleware)
 
 const VexlProductNotificationsApiGroup = HttpApiGroup.make(
   'VexlProductNotifications'
-).add(CreateVexlProductNotificationEndpoint)
+)
+  .add(CreateVexlProductNotificationEndpoint)
+  .middleware(AdminTokenMiddleware)
+
+// Read-only published content for the websites running in the cluster
+const WebsiteApiGroup = HttpApiGroup.make('Website')
+  .add(GetPublishedBlogPostsEndpoint)
+  .add(GetPublishedEventsEndpoint)
 
 export const ContentInternalApiSpecification = HttpApi.make(
   'Content Internal API'
 )
   .add(CmsApiGroup)
   .add(VexlProductNotificationsApiGroup)
+  .add(WebsiteApiGroup)
   .addError(NotFoundError, {status: 404})
   .addError(UnexpectedServerError, {status: 500})
-  .middleware(AdminTokenMiddleware)

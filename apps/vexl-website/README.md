@@ -7,16 +7,20 @@ Webflow's exported CSS (`src/styles/webflow.css`), vendored as is.
 ## Run
 
 Blog posts and community events come from content-service, so the site needs
-`CONTENT_SERVICE_URL` at runtime. The build doesn't call it.
+`CONTENT_SERVICE_URL` at runtime. The build doesn't call it. The site calls
+content-service's internal server, which needs no Cloudflare headers or admin
+token.
 
 Against the local stack (`tooling/dev`):
 
 ```sh
-pnpm dev:backend --only content-service   # http://localhost:3009
-CONTENT_SERVICE_URL=http://localhost:3009 pnpm --filter vexl-website dev
+pnpm dev:backend --only content-service   # internal server on http://localhost:3018
+CONTENT_SERVICE_URL=http://localhost:3018 pnpm --filter vexl-website dev
 ```
 
-Against the production content-service (no backend needed):
+Against the production content-service (no backend needed). The internal
+server isn't reachable from outside the cluster, so this uses the public API,
+which serves the same endpoints at the same paths:
 
 ```sh
 pnpm --filter vexl-website dev:prod-data
@@ -34,7 +38,9 @@ pnpm --filter vexl-website test    # copy files and post HTML sanitizer
 
 The Docker image (`apps/vexl-website/Dockerfile`) runs the standalone Next.js
 server on port 3000. In the cluster, set
-`CONTENT_SERVICE_URL=http://content.vexl.svc.cluster.local:3000`.
+`CONTENT_SERVICE_URL=http://content.vexl.svc.cluster.local:3002`, content-service's
+internal port. The public port 3000 rate-limits by the `cf-connecting-ip` header,
+which in-cluster requests don't have.
 
 ## Languages
 
@@ -75,9 +81,11 @@ Weglot translated.
 
 ## Content
 
-- **Blog posts and events** come from content-service's public
+- **Blog posts and events** come from content-service's
   `/content/website/blog-posts` and `/content/website/events` endpoints
-  (`src/content/contentService.ts`), edited in the backoffice. Responses are
+  (`src/content/contentService.ts`), edited in the backoffice. Both the
+  internal server (`Website` group, no admin token) and the public API serve
+  them. Responses are
   cached in memory for a minute. Posts are listed newest first by
   `publishedAt`, and a post is on the Czech site when it has Czech content.
   Events starting today or later (Prague time) are upcoming.

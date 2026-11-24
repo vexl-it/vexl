@@ -24,14 +24,8 @@ export const getEventsHandler = HttpApiBuilder.handler(
     )
 )
 
-export const getPublishedEventsHandler = HttpApiBuilder.handler(
-  ContentApiSpecification,
-  'Cms',
-  'getPublishedEvents',
-  () =>
-    listPublishedEvents.pipe(
-      Effect.map((events) => ({events})),
-      Effect.withSpan('getPublishedEvents'),
-      makeEndpointEffect
-    )
+export const getPublishedEvents = listPublishedEvents.pipe(
+  Effect.map((events) => ({events})),
+  Effect.withSpan('getPublishedEvents'),
+  makeEndpointEffect
 )

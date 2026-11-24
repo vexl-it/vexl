@@ -1,6 +1,6 @@
 import {FetchHttpClient, HttpApiClient} from '@effect/platform'
 import {type BlogPost, type CmsEvent} from '@vexl-next/domain/src/general/cms'
-import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
+import {ContentInternalApiSpecification} from '@vexl-next/rest-api/src/services/content/internalSpecification'
 import {Config, Duration, Effect, Schema} from 'effect'
 
 const CACHE_TTL = Duration.seconds(60)
@@ -9,13 +9,15 @@ export class ContentServiceError extends Schema.TaggedError<ContentServiceError>
   'ContentServiceError'
 )('ContentServiceError', {content: Schema.String}) {}
 
-const cmsClient = Effect.gen(function* () {
+const websiteClient = Effect.gen(function* () {
   const baseUrl = yield* Config.string('CONTENT_SERVICE_URL')
-  const client = yield* HttpApiClient.make(ContentApiSpecification, {baseUrl})
-  return client.Cms
+  const client = yield* HttpApiClient.make(ContentInternalApiSpecification, {
+    baseUrl,
+  })
+  return client.Website
 })
 
-type CmsClient = Effect.Effect.Success<typeof cmsClient>
+type WebsiteClient = Effect.Effect.Success<typeof websiteClient>
 
 /**
  * Successful responses are kept in memory for a minute, failures are retried
@@ -23,9 +25,9 @@ type CmsClient = Effect.Effect.Success<typeof cmsClient>
  */
 function cachedContent<A, E extends {readonly _tag: string}>(
   content: string,
-  request: (cms: CmsClient) => Effect.Effect<A, E>
+  request: (website: WebsiteClient) => Effect.Effect<A, E>
 ): () => Promise<A> {
-  const fetchContent = cmsClient.pipe(
+  const fetchContent = websiteClient.pipe(
     Effect.flatMap(request),
     Effect.provide(FetchHttpClient.layer),
     Effect.tapError((error) =>
@@ -46,11 +48,11 @@ function cachedContent<A, E extends {readonly _tag: string}>(
 }
 
 export const loadPublishedBlogPosts: () => Promise<readonly BlogPost[]> =
-  cachedContent('blog posts', (cms) =>
-    Effect.map(cms.getPublishedBlogPosts({}), (res) => res.blogPosts)
+  cachedContent('blog posts', (website) =>
+    Effect.map(website.getPublishedBlogPosts({}), (res) => res.blogPosts)
   )
 
 export const loadPublishedEvents: () => Promise<readonly CmsEvent[]> =
-  cachedContent('events', (cms) =>
-    Effect.map(cms.getPublishedEvents({}), (res) => res.events)
+  cachedContent('events', (website) =>
+    Effect.map(website.getPublishedEvents({}), (res) => res.events)
   )

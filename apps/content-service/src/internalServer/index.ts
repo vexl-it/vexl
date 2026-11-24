@@ -5,6 +5,7 @@ import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfig
 import {makeInternalApiServer} from '@vexl-next/server-utils/src/InternalServer'
 import {Layer} from 'effect'
 import {VexlProductNotificationsDbService} from '../db/VexlProductNotificationsDbService'
+import {getPublishedBlogPosts} from '../handlers/blog'
 import {
   createBlogPostHandler,
   deleteBlogPostHandler,
@@ -21,6 +22,7 @@ import {
   unpublishEventHandler,
   updateEventHandler,
 } from '../handlers/cms/adminEvents'
+import {getPublishedEvents} from '../handlers/events'
 import {createVexlProductNotificationHandler} from '../handlers/vexlProductNotifications/createVexlProductNotification'
 
 const CmsApiGroupLive = HttpApiBuilder.group(
@@ -52,11 +54,21 @@ const VexlProductNotificationsApiGroupLive = HttpApiBuilder.group(
     )
 )
 
+const WebsiteApiGroupLive = HttpApiBuilder.group(
+  ContentInternalApiSpecification,
+  'Website',
+  (h) =>
+    h
+      .handle('getPublishedBlogPosts', () => getPublishedBlogPosts)
+      .handle('getPublishedEvents', () => getPublishedEvents)
+)
+
 export const ContentInternalApiLive = HttpApiBuilder.api(
   ContentInternalApiSpecification
 ).pipe(
   Layer.provide(CmsApiGroupLive),
   Layer.provide(VexlProductNotificationsApiGroupLive),
+  Layer.provide(WebsiteApiGroupLive),
   Layer.provide(VexlProductNotificationsDbService.Live),
   Layer.provide(AdminTokenMiddlewareLive)
 )

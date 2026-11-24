@@ -37,14 +37,8 @@ export const getBlogsHandler = HttpApiBuilder.handler(
     }).pipe(Effect.withSpan('getBlogs'), makeEndpointEffect)
 )
 
-export const getPublishedBlogPostsHandler = HttpApiBuilder.handler(
-  ContentApiSpecification,
-  'Cms',
-  'getPublishedBlogPosts',
-  () =>
-    listPublishedBlogPosts.pipe(
-      Effect.map((blogPosts) => ({blogPosts})),
-      Effect.withSpan('getPublishedBlogPosts'),
-      makeEndpointEffect
-    )
+export const getPublishedBlogPosts = listPublishedBlogPosts.pipe(
+  Effect.map((blogPosts) => ({blogPosts})),
+  Effect.withSpan('getPublishedBlogPosts'),
+  makeEndpointEffect
 )

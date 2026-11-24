@@ -20,7 +20,7 @@ import {BlogPostsDbService} from './db/BlogPostsDbService'
 import {EventsDbService} from './db/EventsDbService'
 import DbLayer from './db/layer'
 import {VexlProductNotificationsDbService} from './db/VexlProductNotificationsDbService'
-import {getBlogsHandler, getPublishedBlogPostsHandler} from './handlers/blog'
+import {getBlogsHandler, getPublishedBlogPosts} from './handlers/blog'
 import {createInvoiceHandler} from './handlers/donations/createInvoice'
 import {getInvoiceHandler} from './handlers/donations/getInvoice'
 import {getVexlProductNotificationsHandler} from './handlers/vexlProductNotifications/getVexlProductNotifications'
@@ -28,7 +28,7 @@ import {getVexlProductNotificationsHandler} from './handlers/vexlProductNotifica
 import {getInvoiceStatusTypeHandler} from './handlers/donations/getInvoiceStatusType'
 import {updateInvoiceStateWebhook} from './handlers/donations/updateInvoiceStateWebhook'
 import {UpdateInvoiceStateWebhookService} from './handlers/donations/UpdateInvoiceStateWebhookService'
-import {getEventsHandler, getPublishedEventsHandler} from './handlers/events'
+import {getEventsHandler, getPublishedEvents} from './handlers/events'
 import {getDeviceConfigHandler} from './handlers/getDeviceConfig'
 import {getMapStylesHandler} from './handlers/getMapStyles'
 import {newsAndAnonouncementsHandler} from './handlers/getNewsAndAnnonuncements'
@@ -44,8 +44,8 @@ const CmsApiGroupLive = HttpApiBuilder.group(
     h
       .handle('getEvents', getEventsHandler)
       .handle('getBlogArticles', getBlogsHandler)
-      .handle('getPublishedBlogPosts', getPublishedBlogPostsHandler)
-      .handle('getPublishedEvents', getPublishedEventsHandler)
+      .handle('getPublishedBlogPosts', () => getPublishedBlogPosts)
+      .handle('getPublishedEvents', () => getPublishedEvents)
 )
 
 const NewsAndAnnouncementsApiGroupLive = HttpApiBuilder.group(

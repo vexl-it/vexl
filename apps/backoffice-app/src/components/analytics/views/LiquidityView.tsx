@@ -3,10 +3,10 @@
 import {formatValue, type LiquidityData} from '@/src/services/analytics/domain'
 import {Array, Option, pipe} from 'effect'
 import {
-  CHART_BLUE,
-  CHART_NEUTRAL,
-  CHART_ORANGE,
-  CHART_RED,
+  CHART_MUTED,
+  CHART_NEGATIVE,
+  CHART_POSITIVE,
+  CHART_PRIMARY,
 } from '../../chartTheme'
 import {
   BucketBarChart,
@@ -20,23 +20,23 @@ import {
 import {ViewData} from '../ViewData'
 
 const OFFER_TYPE_SERIES = [
-  {key: 'buy', label: 'Buy', color: CHART_BLUE},
-  {key: 'sell', label: 'Sell', color: CHART_ORANGE},
+  {key: 'buy', label: 'Buy', color: CHART_PRIMARY},
+  {key: 'sell', label: 'Sell', color: CHART_POSITIVE},
 ]
 const OUTCOME_SERIES = [
-  {key: 'approved', label: 'Approved', color: CHART_BLUE},
-  {key: 'rejected', label: 'Rejected', color: CHART_ORANGE},
-  {key: 'cancelled', label: 'Cancelled', color: CHART_RED},
-  {key: 'noResponse', label: 'No answer within 14 days', color: CHART_NEUTRAL},
+  {key: 'approved', label: 'Approved', color: CHART_POSITIVE},
+  {key: 'rejected', label: 'Rejected', color: CHART_NEGATIVE},
+  {key: 'cancelled', label: 'Cancelled', color: CHART_PRIMARY},
+  {key: 'noResponse', label: 'No answer within 14 days', color: CHART_MUTED},
 ]
-const SENT_SERIES = [{key: 'sent', label: 'Sent', color: CHART_NEUTRAL}]
+const SENT_SERIES = [{key: 'sent', label: 'Sent', color: CHART_MUTED}]
 const MARKETPLACE_SERIES = [
-  {key: 'main', label: 'Main marketplace', color: CHART_BLUE},
-  {key: 'club', label: 'Clubs', color: CHART_ORANGE},
+  {key: 'main', label: 'Main marketplace', color: CHART_PRIMARY},
+  {key: 'club', label: 'Clubs', color: CHART_POSITIVE},
 ]
 // Countries come largest first in both charts, so a country keeps its color;
-// a single picked country is blue
-const COUNTRY_COLORS = [CHART_BLUE, CHART_ORANGE, CHART_RED]
+// a single picked country is gold
+const COUNTRY_COLORS = [CHART_PRIMARY, CHART_POSITIVE, CHART_NEGATIVE]
 
 const withColors = (
   items: ReadonlyArray<{key: string; label: string}>
@@ -46,11 +46,11 @@ const withColors = (
     ...item,
     color:
       item.key === 'all'
-        ? CHART_NEUTRAL
+        ? CHART_MUTED
         : pipe(
             Array.findFirstIndex(countries, (country) => country === item),
             Option.flatMap((index) => Array.get(COUNTRY_COLORS, index)),
-            Option.getOrElse(() => CHART_BLUE)
+            Option.getOrElse(() => CHART_PRIMARY)
           ),
   }))
 }

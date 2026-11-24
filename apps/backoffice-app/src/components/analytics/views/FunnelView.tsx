@@ -2,7 +2,7 @@
 
 import {formatValue, type FunnelData} from '@/src/services/analytics/domain'
 import {Array} from 'effect'
-import {CHART_BLUE, CHART_NEUTRAL, CHART_ORANGE} from '../../chartTheme'
+import {CHART_MUTED, CHART_POSITIVE, CHART_PRIMARY} from '../../chartTheme'
 import {
   BucketBarChart,
   ChartCard,
@@ -16,13 +16,13 @@ import {useAnalyticsFilters} from '../filtersContext'
 import {ViewData} from '../ViewData'
 
 const ACTIVATION_SERIES = [
-  {key: 'main', label: 'Activated in main marketplace', color: CHART_BLUE},
-  {key: 'club', label: 'Activated in Clubs only', color: CHART_ORANGE},
+  {key: 'main', label: 'Activated in main marketplace', color: CHART_PRIMARY},
+  {key: 'club', label: 'Activated in Clubs only', color: CHART_POSITIVE},
 ]
-const USERS_SERIES = [{key: 'users', label: 'Users', color: CHART_NEUTRAL}]
-const SHARE_SERIES = [{key: 'share', label: 'Share', color: CHART_BLUE}]
+const USERS_SERIES = [{key: 'users', label: 'Users', color: CHART_MUTED}]
+const SHARE_SERIES = [{key: 'share', label: 'Share', color: CHART_PRIMARY}]
 const ACTIVATED_SERIES = [
-  {key: 'activated', label: 'Activated', color: CHART_BLUE},
+  {key: 'activated', label: 'Activated', color: CHART_PRIMARY},
 ]
 
 export function FunnelView() {

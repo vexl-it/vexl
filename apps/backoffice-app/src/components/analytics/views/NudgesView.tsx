@@ -1,12 +1,12 @@
 'use client'
 
 import {type NudgesData} from '@/src/services/analytics/domain'
-import {CHART_BLUE} from '../../chartTheme'
+import {CHART_PRIMARY} from '../../chartTheme'
 import {ChartCard, DataTable, TimeSeriesChart, seriesTable} from '../charts'
 import {ViewData} from '../ViewData'
 
 const ALLOWED_SERIES = [
-  {key: 'allowed', label: 'Notifications allowed', color: CHART_BLUE},
+  {key: 'allowed', label: 'Notifications allowed', color: CHART_PRIMARY},
 ]
 
 export function NudgesView() {

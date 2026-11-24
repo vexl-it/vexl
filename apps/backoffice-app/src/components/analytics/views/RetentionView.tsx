@@ -1,7 +1,7 @@
 'use client'
 
 import {type RetentionData} from '@/src/services/analytics/domain'
-import {CHART_BLUE, CHART_NEUTRAL} from '../../chartTheme'
+import {CHART_MUTED, CHART_PRIMARY} from '../../chartTheme'
 import {
   BucketBarChart,
   ChartCard,
@@ -16,22 +16,22 @@ const REACTIVATION_SERIES = [
   {
     key: 'share',
     label: 'Core action within 7 days of returning',
-    color: CHART_BLUE,
+    color: CHART_PRIMARY,
   },
 ]
 const REACTIVATION_TABLE_SERIES = [
-  {key: 'returned', label: 'Returned after 30+ days', color: CHART_NEUTRAL},
+  {key: 'returned', label: 'Returned after 30+ days', color: CHART_MUTED},
   {
     key: 'withCoreAction',
     label: 'Then a core action within 7 days',
-    color: CHART_BLUE,
+    color: CHART_PRIMARY,
   },
 ]
 const RATE_SERIES = [
-  {key: 'rate', label: 'Came back that week', color: CHART_NEUTRAL},
+  {key: 'rate', label: 'Came back that week', color: CHART_MUTED},
 ]
-const USERS_SERIES = [{key: 'users', label: 'Users', color: CHART_NEUTRAL}]
-const SHARE_SERIES = [{key: 'share', label: 'Share', color: CHART_BLUE}]
+const USERS_SERIES = [{key: 'users', label: 'Users', color: CHART_MUTED}]
+const SHARE_SERIES = [{key: 'share', label: 'Share', color: CHART_PRIMARY}]
 
 export function RetentionView() {
   return (

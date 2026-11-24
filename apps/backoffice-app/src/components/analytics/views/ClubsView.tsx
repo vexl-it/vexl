@@ -1,7 +1,7 @@
 'use client'
 
 import {type ClubsData} from '@/src/services/analytics/domain'
-import {CHART_BLUE, CHART_NEUTRAL, CHART_ORANGE} from '../../chartTheme'
+import {CHART_MUTED, CHART_POSITIVE, CHART_PRIMARY} from '../../chartTheme'
 import {
   BucketBarChart,
   ChartCard,
@@ -11,25 +11,25 @@ import {
 } from '../charts'
 import {ViewData} from '../ViewData'
 
-const JOIN_SERIES = [{key: 'joins', label: 'Joins', color: CHART_ORANGE}]
+const JOIN_SERIES = [{key: 'joins', label: 'Joins', color: CHART_POSITIVE}]
 const MARKETPLACE_USE_SERIES = [
   {
     key: 'membersMain',
     label: 'Club members: core action in main marketplace',
-    color: CHART_BLUE,
+    color: CHART_PRIMARY,
   },
   {
     key: 'membersClub',
     label: 'Club members: core action in Clubs',
-    color: CHART_ORANGE,
+    color: CHART_POSITIVE,
   },
   {
     key: 'othersMain',
     label: 'Not in a Club: core action in main marketplace',
-    color: CHART_NEUTRAL,
+    color: CHART_MUTED,
   },
 ]
-const SHARE_SERIES = [{key: 'share', label: 'Share', color: CHART_ORANGE}]
+const SHARE_SERIES = [{key: 'share', label: 'Share', color: CHART_POSITIVE}]
 
 export function ClubsView() {
   return <ViewData view="clubs">{(data) => <Clubs data={data} />}</ViewData>

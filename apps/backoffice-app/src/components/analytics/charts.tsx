@@ -29,9 +29,9 @@ import {
 } from 'recharts'
 import {
   CHART_AXIS,
-  CHART_BLUE,
   CHART_GRID,
   CHART_MUTED,
+  CHART_PRIMARY,
   CHART_SEQUENTIAL,
 } from '../chartTheme'
 import {useAnalyticsFilters} from './filtersContext'
@@ -553,7 +553,7 @@ export function StepBars({steps}: {steps: readonly FunnelStep[]}) {
             className="h-4 rounded-sm"
             style={{
               width: `${((step.count ?? 0) / largest) * 100}%`,
-              backgroundColor: CHART_BLUE,
+              backgroundColor: CHART_PRIMARY,
             }}
           />
           <span className="tabular-nums text-gray-900">

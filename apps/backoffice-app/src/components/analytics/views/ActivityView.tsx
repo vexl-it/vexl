@@ -7,9 +7,9 @@ import {
   uniquePeriodOf,
 } from '@/src/services/analytics/domain'
 import {
-  CHART_BLUE,
-  CHART_NEUTRAL,
-  CHART_ORANGE,
+  CHART_MUTED,
+  CHART_POSITIVE,
+  CHART_PRIMARY,
   CHART_SEQUENTIAL,
 } from '../../chartTheme'
 import {
@@ -27,30 +27,30 @@ const ACTIVE_SERIES = [
   {
     key: 'mainOnly',
     label: 'Core action: main marketplace only',
-    color: CHART_BLUE,
+    color: CHART_PRIMARY,
   },
   {key: 'both', label: 'Core action: both', color: CHART_SEQUENTIAL[5]},
-  {key: 'clubOnly', label: 'Core action: Clubs only', color: CHART_ORANGE},
-  {key: 'openedOnly', label: 'Opened, no core action', color: CHART_NEUTRAL},
+  {key: 'clubOnly', label: 'Core action: Clubs only', color: CHART_POSITIVE},
+  {key: 'openedOnly', label: 'Opened, no core action', color: CHART_MUTED},
 ]
 const ACTIVE_TABLE_SERIES = [
   ...ACTIVE_SERIES,
-  {key: 'opened', label: 'Opened the app (total)', color: CHART_NEUTRAL},
+  {key: 'opened', label: 'Opened the app (total)', color: CHART_MUTED},
 ]
 const STICKINESS_SERIES = [
-  {key: 'opened', label: 'Opened the app', color: CHART_NEUTRAL},
-  {key: 'core', label: 'Core action', color: CHART_BLUE},
+  {key: 'opened', label: 'Opened the app', color: CHART_MUTED},
+  {key: 'core', label: 'Core action', color: CHART_PRIMARY},
 ]
-const DAYS_SERIES = [{key: 'share', label: 'Share', color: CHART_BLUE}]
+const DAYS_SERIES = [{key: 'share', label: 'Share', color: CHART_PRIMARY}]
 const OPENS_SERIES = [
-  {key: 'perInstall', label: 'Opens per active install', color: CHART_BLUE},
+  {key: 'perInstall', label: 'Opens per active install', color: CHART_PRIMARY},
 ]
 const OPENS_TABLE_SERIES = [
   ...OPENS_SERIES,
-  {key: 'opens', label: 'Opens (total)', color: CHART_BLUE},
+  {key: 'opens', label: 'Opens (total)', color: CHART_PRIMARY},
 ]
 const BACKEND_ACTIVE_SERIES = [
-  {key: 'users', label: 'Users', color: CHART_NEUTRAL},
+  {key: 'users', label: 'Users', color: CHART_MUTED},
 ]
 
 export function ActivityView() {

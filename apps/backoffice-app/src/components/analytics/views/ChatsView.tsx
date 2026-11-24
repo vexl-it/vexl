@@ -2,7 +2,7 @@
 
 import {type ChatsData, formatValue} from '@/src/services/analytics/domain'
 import {Array} from 'effect'
-import {CHART_BLUE, CHART_NEUTRAL} from '../../chartTheme'
+import {CHART_MUTED, CHART_PRIMARY} from '../../chartTheme'
 import {
   ChartCard,
   StatTile,
@@ -13,8 +13,8 @@ import {
 import {ViewData} from '../ViewData'
 
 const RATING_SERIES = [
-  {key: 'submitted', label: 'Ratings submitted', color: CHART_NEUTRAL},
-  {key: 'positive', label: 'Positive (4–5★)', color: CHART_BLUE},
+  {key: 'submitted', label: 'Ratings submitted', color: CHART_MUTED},
+  {key: 'positive', label: 'Positive (4–5★)', color: CHART_PRIMARY},
 ]
 
 export function ChatsView() {

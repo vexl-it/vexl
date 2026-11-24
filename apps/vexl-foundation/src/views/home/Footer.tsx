@@ -109,6 +109,7 @@ export function Footer({t}: {readonly t: PageCopy<'home'>}): React.JSX.Element {
           <p className="p3">{t('footer.copyright')}</p>
         </div>
       </div>
+      <p className="p3 footer-privacy">{t('footer.privacy')}</p>
     </>
   )
 }

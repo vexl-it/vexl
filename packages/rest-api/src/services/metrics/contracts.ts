@@ -34,6 +34,7 @@ export class InvalidAnalyticsStateError extends Schema.TaggedError<InvalidAnalyt
 }) {}
 
 export const OHTTP_REQUEST_CONTENT_TYPE = 'message/ohttp-req'
+export const OHTTP_RESPONSE_CONTENT_TYPE = 'message/ohttp-res'
 
 /**
  * Sent inside the encrypted request instead of the common headers, so the

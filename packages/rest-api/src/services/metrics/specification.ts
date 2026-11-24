@@ -16,6 +16,7 @@ import {
   AnalyticsGatewayKeyUnavailableError,
   InvalidAnalyticsStateError,
   OHTTP_REQUEST_CONTENT_TYPE,
+  OHTTP_RESPONSE_CONTENT_TYPE,
   ReportNotificationInteractionRequest,
 } from './contracts'
 
@@ -39,7 +40,9 @@ export const RelayAnalyticsStateEndpoint = HttpApiEndpoint.post(
   .setPayload(
     HttpApiSchema.Uint8Array({contentType: OHTTP_REQUEST_CONTENT_TYPE})
   )
-  .addSuccess(NoContentResponse)
+  .addSuccess(
+    HttpApiSchema.Uint8Array({contentType: OHTTP_RESPONSE_CONTENT_TYPE})
+  )
   .addError(InvalidAnalyticsStateError, {status: 400})
   .addError(AnalyticsGatewayKeyUnavailableError, {status: 503})
   .annotate(MaxExpectedDailyCall, 1_000_000)

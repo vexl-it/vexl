@@ -51,7 +51,12 @@ const upload = Option.getOrThrow(
 
 describe('uploadAnalyticsStateAtom', () => {
   it('posts only an encrypted body and its content type to the relay', async () => {
-    fetchMock.mockResolvedValue(new Response(null, {status: 204}))
+    fetchMock.mockResolvedValue(
+      new Response(null, {
+        status: 200,
+        headers: {'content-type': 'message/ohttp-res'},
+      })
+    )
 
     await Effect.runPromise(upload(state))
 

@@ -1,3 +1,4 @@
+import {HttpClient, HttpClientRequest} from '@effect/platform/index'
 import {dayOf, isoWeekStart} from '@vexl-next/analytics-definitions/src/buckets'
 import {DayString} from '@vexl-next/analytics-definitions/src/core'
 import {
@@ -7,6 +8,8 @@ import {
 import {
   encodeRelayedAnalyticsState,
   InvalidAnalyticsStateError,
+  OHTTP_REQUEST_CONTENT_TYPE,
+  OHTTP_RESPONSE_CONTENT_TYPE,
 } from '@vexl-next/rest-api/src/services/metrics/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Schema} from 'effect'
@@ -396,6 +399,30 @@ describe('relayAnalyticsState', () => {
         client: iosClientWithPrefix,
         state: testJourneyUpsert(),
       }),
+    })
+
+    it('answers 200 with message/ohttp-res content type so RFC 9458 relays accept it', async () => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const request = yield* _(encapsulatedOnboarding)
+          const client = yield* _(HttpClient.HttpClient)
+          const response = yield* _(
+            HttpClientRequest.post('/analytics/ohttp').pipe(
+              HttpClientRequest.bodyUint8Array(
+                request,
+                OHTTP_REQUEST_CONTENT_TYPE
+              ),
+              client.execute
+            )
+          )
+
+          expect(response.status).toBe(200)
+          expect(response.headers['content-type']).toBe(
+            OHTTP_RESPONSE_CONTENT_TYPE
+          )
+          expect((yield* _(response.arrayBuffer)).byteLength).toBe(0)
+        })
+      )
     })
 
     it('answers 503 for a key the gateway does not hold, so the client retries', async () => {

@@ -156,7 +156,7 @@ export const relayAnalyticsState = HttpApiBuilder.handler(
   ({payload}) =>
     openRelayedState(payload).pipe(
       Effect.flatMap(storeAnalyticsState),
-      Effect.as({}),
+      Effect.as(new Uint8Array()),
       makeEndpointEffect
     )
 )

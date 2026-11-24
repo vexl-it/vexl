@@ -2,6 +2,7 @@ import {CopyText} from '@vexl-next/website-utils/src/inlineCopy'
 import {Array, Either, Record, Schema} from 'effect'
 import csAudit from '../../content/copy/cs/audit.json'
 import csBlog from '../../content/copy/cs/blog.json'
+import csBrand from '../../content/copy/cs/brand.json'
 import csCommunity from '../../content/copy/cs/community.json'
 import csDownload from '../../content/copy/cs/download.json'
 import csFaq from '../../content/copy/cs/faq.json'
@@ -11,6 +12,7 @@ import csShared from '../../content/copy/cs/shared.json'
 import csTermsPrivacy from '../../content/copy/cs/terms-privacy.json'
 import enAudit from '../../content/copy/en/audit.json'
 import enBlog from '../../content/copy/en/blog.json'
+import enBrand from '../../content/copy/en/brand.json'
 import enCommunity from '../../content/copy/en/community.json'
 import enDownload from '../../content/copy/en/download.json'
 import enFaq from '../../content/copy/en/faq.json'
@@ -33,6 +35,7 @@ const files = {
   blog: {en: enBlog, cs: csBlog},
   faq: {en: enFaq, cs: csFaq},
   audit: {en: enAudit, cs: csAudit},
+  brand: {en: enBrand, cs: csBrand},
   'terms-privacy': {en: enTermsPrivacy, cs: csTermsPrivacy},
   'not-found': {en: enNotFound, cs: csNotFound},
 }

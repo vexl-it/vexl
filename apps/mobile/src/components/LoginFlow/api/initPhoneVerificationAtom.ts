@@ -11,6 +11,7 @@ import {
   allowLoginAgainAtom,
   updateNumberOfLoginAttemptsActionAtom,
 } from '../../../state/numberOfLoginAttemptsMmkvAtom'
+import {reportOnboardingStepActionAtom} from '../../../utils/analytics'
 import isString from '../../../utils/isString'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
@@ -183,6 +184,9 @@ export const initPhoneVerificationAtom = atom(
           toCommonErrorMessage(e, t) ??
             t('common.somethingWentWrongDescription')
         )
+      }),
+      Effect.tap(() => {
+        set(reportOnboardingStepActionAtom, 'phoneSubmitted')
       })
     )
   }

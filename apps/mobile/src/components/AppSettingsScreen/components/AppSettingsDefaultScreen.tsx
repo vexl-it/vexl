@@ -2,9 +2,12 @@ import {
   ChevronLeft,
   DuoToneContrastTheme,
   EuroCurrency,
+  InfoCircle,
   Language,
+  Menu,
   MenuItem,
   NavigationBar,
+  PeopleUsers,
   Screen,
   ScreenCaptureShot,
   Switch,
@@ -12,7 +15,12 @@ import {
 } from '@vexl-next/ui'
 import React from 'react'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
+import {
+  analyticsBlogPostUrl,
+  analyticsOptInAtom,
+} from '../../../utils/analytics'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import openUrl from '../../../utils/openUrl'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {allowScreenshotsAtom} from '../atoms'
 
@@ -64,6 +72,19 @@ function AppSettingsDefaultScreen({
           showChevron={false}
           tag={<Switch valueAtom={allowScreenshotsAtom} />}
         />
+        <Menu>
+          <MenuItem
+            label={t('appSettings.usageStatistics')}
+            icon={PeopleUsers}
+            showChevron={false}
+            tag={<Switch valueAtom={analyticsOptInAtom} />}
+          />
+          <MenuItem
+            label={t('appSettings.usageStatisticsLink')}
+            icon={InfoCircle}
+            onPress={openUrl(analyticsBlogPostUrl)}
+          />
+        </Menu>
       </YStack>
     </Screen>
   )

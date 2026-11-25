@@ -51,6 +51,11 @@ jest.mock('../../../components/DonationPrompt/atoms/stateAtoms', () => ({
     }),
   DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT: 10,
 }))
+jest.mock('../../../utils/analytics', () => ({
+  reportRequestChatUpdatedActionAtom: jest
+    .requireActual('jotai')
+    .atom(null, () => undefined),
+}))
 jest.mock('../../../utils/runWhenIdleWithTimeout', () => ({
   __esModule: true,
   default: (callback: () => void) => {

@@ -15,6 +15,7 @@ import {
   claimDonationPromptDisplayActionAtom,
   DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT,
 } from '../../../components/DonationPrompt/atoms/stateAtoms'
+import {reportRequestChatUpdatedActionAtom} from '../../../utils/analytics'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -214,6 +215,10 @@ export default function sendMessagesActionAtom(
           markAsFailed(pending, {_tag: 'ReceiverInboxDoesNotExistError'})
           return
         }
+        set(reportRequestChatUpdatedActionAtom, {
+          chat: get(chatWithMessagesAtom),
+          newMessages: [],
+        })
 
         if (
           numberOfMessagesInChat >

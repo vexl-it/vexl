@@ -9,6 +9,7 @@ import * as Notifications from 'expo-notifications'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {Linking} from 'react-native'
+import {reportNotificationOpenedActionAtom} from '../utils/analytics'
 import {
   isOnMessagesList,
   isOnSpecificChat,
@@ -39,6 +40,7 @@ const reactOnNotificationOpenAtom = atom(
       set(lastHandledExpoNotificationDateAtom, notificationDate)
 
       const data = response.notification.request.content.data
+      set(reportNotificationOpenedActionAtom, data)
 
       const vexlProductNotificationO = Schema.decodeUnknownOption(
         VexlProductNotificationData

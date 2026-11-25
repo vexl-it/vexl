@@ -28,6 +28,15 @@ export const isAuthDisabled = (): boolean =>
 export const isAuthDisabledInProduction = (): boolean =>
   isProduction && Effect.runSync(disableAuthConfig)
 
+// Read-only access to the metrics-service database for the analytics dashboard.
+export const metricsDatabaseConfig = Config.all({
+  host: Config.string('METRICS_DB_HOST'),
+  port: Config.number('METRICS_DB_PORT'),
+  username: Config.string('METRICS_DB_USER'),
+  password: Config.redacted('METRICS_DB_PASSWORD'),
+  database: Config.string('METRICS_DB_NAME'),
+})
+
 export const slideshowS3Config = Config.all({
   region: Config.string('AWS_REGION').pipe(Config.withDefault('eu-west-1')),
   bucketName: Config.string('S3_BUCKET_NAME'),

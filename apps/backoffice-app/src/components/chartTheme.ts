@@ -7,3 +7,13 @@ export const CHART_NEGATIVE = '#ee675e'
 export const CHART_GRID = '#efedf3'
 export const CHART_AXIS = '#d6d4db'
 export const CHART_MUTED = '#8a8a8a'
+
+// Gold ramp, light to dark, for heatmap cells
+export const CHART_SEQUENTIAL = [
+  '#f6ead2',
+  '#ebd3a4',
+  '#dcb874',
+  '#be8821',
+  '#946a1a',
+  '#6b4c12',
+] as const

@@ -4,6 +4,7 @@ import {
   RateLimitedError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
+import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {SubmitFeedbackRequest} from './contracts'
@@ -12,6 +13,7 @@ export const SubmitFeedbackEndpoint = HttpApiEndpoint.post(
   'submitFeedback',
   '/api/v1/feedback/submit'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(SubmitFeedbackRequest)
   .annotate(MaxExpectedDailyCall, 10)
 

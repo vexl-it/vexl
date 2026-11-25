@@ -52,6 +52,8 @@ export interface CommonFriendsClub {
 export type RootStackParamsList = {
   LoginFlow: NavigatorScreenParams<LoginFlowStackParamsList>
 
+  AnalyticsConsent: undefined
+
   PostLoginFlow: NavigatorScreenParams<PostLoginFlowStackParamsList>
 
   InsideTabs: NavigatorScreenParams<InsideTabParamsList>
@@ -310,6 +312,7 @@ export type LoginStackScreenProps<T extends keyof LoginStackParamsList> =
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type LoginFlowStackParamsList = {
   Intro1: undefined
+  AnalyticsConsent: undefined
   Intro2: undefined
   PhoneNumber: {readonly restore?: boolean} | undefined
   CountryPicker: undefined

@@ -26,6 +26,7 @@ import '../../state/notifications/refreshVexlTokenMetadataTask'
 import '../../state/notifications/removeLegacyNotificationStorageInAppLoadingTask'
 import '../../state/refreshOffersAndEnsureInboxesInAppLoadingTask'
 import '../../state/refreshUserOnContactServiceInAppBackgroundTask'
+import '../analytics/flushAnalyticsOnStartInAppLoadingTask'
 
 export const useInAppLoadingTasks = (): void => {
   const isLoggedIn = useAtomValue(userLoggedInAtom)

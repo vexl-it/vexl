@@ -11,6 +11,7 @@ export const INFRA_SERVICES: readonly string[] = [
   'geocoding-postgres',
   'redis',
   'minio',
+  'ohttp-relay',
 ]
 
 export function buildDockerEnv(
@@ -35,6 +36,8 @@ export function buildDockerEnv(
     CHAT_IMAGES_EXPIRE_DAYS: String(
       ctx.cfg.serviceConstants.chatService.MESSAGE_EXPIRATION_UPPER_LIMIT_DAYS
     ),
+    OHTTP_RELAY_PORT: String(ctx.ports.ohttpRelay),
+    METRICS_SERVICE_PORT: String(ctx.ports.metricsService),
     GRAFANA_PORT: String(ctx.ports.grafana),
     LOKI_PORT: String(ctx.ports.loki),
     TEMPO_PORT: String(ctx.ports.tempo),

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["node"],
+    "types": ["node", "jest"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -13,5 +13,9 @@
     "skipLibCheck": true,
     "checkJs": false,
     "allowJs": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   }
 }

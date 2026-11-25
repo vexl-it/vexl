@@ -1,0 +1,14 @@
+{
+  "revision": 2,
+  "prod": {
+    "relayUrls": ["https://relay.oblivious.network/classy-towel-7"],
+    "gatewayKeyConfig": "AQAgH2ELm67ZQGVCPxXQ6TPg7G+qA9VWmaobmJ+s8KFqHCIABAABAAM="
+  },
+  "stage": {
+    "relayUrls": [
+      "https://ohttp.eu.freedomrelay.dev/vexl-analytics",
+      "https://relay.oblivious.network/gutsy-plant-31"
+    ],
+    "gatewayKeyConfig": "AQAg3z+pxXI3QhAhqJKOtK05saShbpus37vtO+uqWownICMABAABAAM="
+  }
+}

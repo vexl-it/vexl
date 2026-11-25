@@ -14,6 +14,7 @@ function CreateOfferMarketplaceSuggestion(): React.ReactElement {
 
   return (
     <DismissableMarketplaceBanner
+      promptId="createOffer"
       color="pink"
       title={t('marketplace.createOfferSuggestion.title')}
       description={t('marketplace.createOfferSuggestion.description')}

@@ -1,6 +1,17 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer} from 'effect'
-import {type LastReportedByServiceRecord} from './domain'
+import {
+  type AnalyticsStateConflictError,
+  type LastReportedByServiceRecord,
+} from './domain'
+import {
+  createDeleteExpiredAnalyticsStates,
+  type DeleteExpiredAnalyticsStatesParams,
+} from './queries/createDeleteExpiredAnalyticsStates'
+import {
+  createExpireAnalyticsStateIds,
+  type ExpireAnalyticsStateIdsParams,
+} from './queries/createExpireAnalyticsStateIds'
 import {
   createInsertDeadMetricRecord,
   type InsertDeadMetricsParams,
@@ -14,6 +25,10 @@ import {
   type InsertMetricsParams,
 } from './queries/createInsertMetricRecord'
 import {createQueryAllLastReportedByService} from './queries/createQueryAllLastReportedByService'
+import {
+  createUpsertAnalyticsState,
+  type UpsertAnalyticsStateParams,
+} from './queries/createUpsertAnalyticsState'
 
 export interface MetricsDbOperations {
   insertMetricRecord: (
@@ -32,6 +47,18 @@ export interface MetricsDbOperations {
     readonly LastReportedByServiceRecord[],
     UnexpectedServerError
   >
+
+  upsertAnalyticsState: (
+    params: UpsertAnalyticsStateParams
+  ) => Effect.Effect<void, UnexpectedServerError | AnalyticsStateConflictError>
+
+  expireAnalyticsStateIds: (
+    params: ExpireAnalyticsStateIdsParams
+  ) => Effect.Effect<number, UnexpectedServerError>
+
+  deleteExpiredAnalyticsStates: (
+    params: DeleteExpiredAnalyticsStatesParams
+  ) => Effect.Effect<number, UnexpectedServerError>
 }
 
 export class MetricsDbService extends Context.Tag('MetricsDbService')<
@@ -49,11 +76,19 @@ export class MetricsDbService extends Context.Tag('MetricsDbService')<
       const queryAllLastReportedByService = yield* _(
         createQueryAllLastReportedByService
       )
+      const upsertAnalyticsState = yield* _(createUpsertAnalyticsState)
+      const expireAnalyticsStateIds = yield* _(createExpireAnalyticsStateIds)
+      const deleteExpiredAnalyticsStates = yield* _(
+        createDeleteExpiredAnalyticsStates
+      )
       return {
         insertMetricRecord,
         insertDeadMetricRecord,
         insertLastReportedByService,
         queryAllLastReportedByService,
+        upsertAnalyticsState,
+        expireAnalyticsStateIds,
+        deleteExpiredAnalyticsStates,
       }
     })
   )

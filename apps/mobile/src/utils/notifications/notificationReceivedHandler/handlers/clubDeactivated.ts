@@ -12,6 +12,7 @@ import {
 import {translationAtom} from '../../../localization/I18nProvider'
 import {displayLocalNotification} from '../../displayLocalNotification'
 import {getDefaultChannel} from '../../notificationChannels'
+import {CLUB_DEACTIVATED} from '../../notificationTypes'
 
 export function handleClubDeactivatedNotification(
   notificationData: ClubDeactivatedNotificationData
@@ -68,6 +69,7 @@ export function handleClubDeactivatedNotification(
             `notifications.CLUB_DEACTIVATED.${notificationData.reason}.body`,
             {name: clubInfo.clubInfo.name}
           ),
+          data: {type: CLUB_DEACTIVATED},
         },
       })
     })

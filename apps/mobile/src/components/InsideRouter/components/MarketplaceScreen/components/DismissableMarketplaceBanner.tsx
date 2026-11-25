@@ -1,23 +1,35 @@
+import {useIsFocused} from '@react-navigation/native'
+import {type PromptId} from '@vexl-next/analytics-definitions/src/definitions/prompt'
 import {Banner, type BannerButton, type BannerProps} from '@vexl-next/ui'
 import React, {useCallback, useRef, useState} from 'react'
 import {Animated, Easing, useWindowDimensions} from 'react-native'
+import {useReportPrompt} from '../../../../../utils/analytics'
+import {useIsRetainedSceneActive} from '../../../../RetainedScene'
 
 const DISMISS_ANIMATION_DURATION_MS = 350
 
 interface Props extends Omit<BannerProps, 'primaryButton' | 'secondaryButton'> {
+  readonly promptId: PromptId
   readonly primaryButton?: BannerButton
   readonly secondaryButton: BannerButton
 }
 
 function DismissableMarketplaceBanner({
+  promptId,
   primaryButton,
   secondaryButton,
   ...props
 }: Props): React.ReactElement {
+  const isFocused = useIsFocused()
+  const isSceneActive = useIsRetainedSceneActive()
+  const [isDismissing, setIsDismissing] = useState(false)
+  const reportPromptOutcome = useReportPrompt(
+    promptId,
+    isFocused && isSceneActive && !isDismissing
+  )
   const {width} = useWindowDimensions()
   const opacity = useRef(new Animated.Value(1)).current
   const translateX = useRef(new Animated.Value(0)).current
-  const [isDismissing, setIsDismissing] = useState(false)
 
   const dismissWithAnimation = useCallback(
     (onDismiss?: () => void) => {
@@ -47,12 +59,14 @@ function DismissableMarketplaceBanner({
   )
 
   const dismissWithPrimaryAction = useCallback(() => {
+    reportPromptOutcome('tapped')
     dismissWithAnimation(primaryButton?.onPress)
-  }, [dismissWithAnimation, primaryButton?.onPress])
+  }, [dismissWithAnimation, primaryButton?.onPress, reportPromptOutcome])
 
   const dismissWithSecondaryAction = useCallback(() => {
+    reportPromptOutcome('dismissed')
     dismissWithAnimation(secondaryButton.onPress)
-  }, [dismissWithAnimation, secondaryButton.onPress])
+  }, [dismissWithAnimation, secondaryButton.onPress, reportPromptOutcome])
 
   return (
     <Animated.View

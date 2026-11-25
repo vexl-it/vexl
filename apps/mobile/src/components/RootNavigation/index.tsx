@@ -8,6 +8,10 @@ import {type RootStackParamsList} from '../../navigationTypes'
 import {useManageTypingIndications} from '../../state/chat/atoms/typingIndication'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
+import {
+  analyticsConsentAskedAtom,
+  useReportAnalyticsOnForeground,
+} from '../../utils/analytics'
 import {useSetupBackgroundTask} from '../../utils/backgroundTask'
 import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
 import {useBackgroundNotificationSocket} from '../../utils/notifications/backgroundNotificationSocket'
@@ -18,6 +22,7 @@ import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AccountBackupScreen from '../AccountBackupScreen'
 import AccountBackupPinScreen from '../AccountBackupScreen/AccountBackupPinScreen'
 import AccountScreen from '../AccountScreen'
+import AnalyticsConsent from '../AnalyticsConsent'
 import AppLogsScreen from '../AppLogsScreen'
 import AppSettingsScreen from '../AppSettingsScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
@@ -104,13 +109,20 @@ function LoggedInHookGroup(): null {
 
   useManageTypingIndications()
 
+  useReportAnalyticsOnForeground()
+
   return null
 }
 
 const LoggedInHookGroupMemoized = memo(LoggedInHookGroup)
 
+function AnalyticsConsentScreen(): React.ReactElement {
+  return <AnalyticsConsent />
+}
+
 function RootNavigation(): React.ReactElement {
   const isLoggedIn = useIsUserLoggedIn()
+  const analyticsConsentAsked = useAtomValue(analyticsConsentAskedAtom)
   const showTextDebugButton = useAtomValue(showTextDebugButtonAtom)
   const showGoldenAvatarAnimation = useAtomValue(showGoldenAvatarAnimationAtom)
 
@@ -124,6 +136,11 @@ function RootNavigation(): React.ReactElement {
       >
         {!isLoggedIn ? (
           <Stack.Screen name="LoginFlow" component={LoginFlow} />
+        ) : !analyticsConsentAsked ? (
+          <Stack.Screen
+            name="AnalyticsConsent"
+            component={AnalyticsConsentScreen}
+          />
         ) : (
           <Stack.Group>
             <Stack.Screen name="InsideTabs" component={InsideScreen} />
@@ -294,7 +311,7 @@ function RootNavigation(): React.ReactElement {
         />
       </Stack.Navigator>
       {!!showTextDebugButton && <DevTranslationFloatingButton />}
-      {!!isLoggedIn && <LoggedInHookGroupMemoized />}
+      {!!isLoggedIn && !!analyticsConsentAsked && <LoggedInHookGroupMemoized />}
       {!!isLoggedIn && !!showGoldenAvatarAnimation && <GoldenAvatarAnimation />}
     </>
   )

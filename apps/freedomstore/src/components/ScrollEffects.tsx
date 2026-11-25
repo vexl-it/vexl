@@ -73,9 +73,20 @@ function setupScrollProgressBar(reducedMotion: boolean): () => void {
 
 function setupAnchorScroll(reducedMotion: boolean): () => void {
   const onClick = (event: MouseEvent): void => {
-    if (event.defaultPrevented || !(event.target instanceof Element)) return
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      !(event.target instanceof Element)
+    ) {
+      return
+    }
     const link = event.target.closest('a[href*="#"]')
     if (!(link instanceof HTMLAnchorElement) || !HASH.test(link.hash)) return
+    if (link.target && link.target !== '_self') return
     if (link.host + link.pathname !== location.host + location.pathname) return
     const target = document.getElementById(link.hash.slice(1))
     if (!target) return
@@ -228,6 +239,12 @@ function setupMarquee(): () => void {
         if (clone instanceof HTMLElement) {
           clone.setAttribute('aria-hidden', 'true')
           clone.setAttribute('data-marquee-clone', 'true')
+          Array.forEach(
+            Array.fromIterable(clone.querySelectorAll('a')),
+            (link) => {
+              link.setAttribute('tabindex', '-1')
+            }
+          )
           clones.push(clone)
           fragment.appendChild(clone)
         }

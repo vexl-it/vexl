@@ -12,6 +12,7 @@
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "generate:nse-vectors": "tsx src/testVectors/generateNseTestVectors.ts",
     "generate:ohttp-key": "tsx src/scripts/generateOhttpGatewayKey.ts",
+    "sign:analytics-relays": "tsx src/scripts/signAnalyticsRelays.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

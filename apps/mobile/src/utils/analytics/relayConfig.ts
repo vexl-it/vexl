@@ -1,3 +1,4 @@
+import {isAnalyticsRelaysSignatureValid} from '@vexl-next/cryptography/src/operations/analyticsRelaysSignature'
 import {OhttpKeyConfig} from '@vexl-next/cryptography/src/operations/ohttp.brand'
 import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 import {Duration, Effect, Option, Schema} from 'effect'
@@ -24,7 +25,10 @@ const PublicAnalyticsRelay = Schema.Struct({
   gatewayKeyConfig: OhttpKeyConfig,
 })
 
-/** `analytics-relays.json` at the repo root. Old apps read it forever: only add fields. */
+/**
+ * `analytics-relays.json` at the repo root. Old apps read it forever: only add fields,
+ * and sign every change (`pnpm --filter @vexl-next/cryptography sign:analytics-relays`).
+ */
 export const AnalyticsRelaysFile = Schema.Struct({
   revision: Schema.NonNegativeInt,
   prod: Schema.optional(PublicAnalyticsRelay),
@@ -45,6 +49,9 @@ export const fetchedRelaysAtom = atomWithParsedMmkvStorage(
   })
 )
 
+const currentRelays = (fetched?: AnalyticsRelaysFile): AnalyticsRelaysFile =>
+  fetched && fetched.revision > bundledRelays.revision ? fetched : bundledRelays
+
 const localRelay = Schema.decodeUnknownOption(AnalyticsRelay)({
   relayUrls: [process.env.EXPO_PUBLIC_LOCAL_ANALYTICS_RELAY],
   gatewayKeyConfig: process.env.EXPO_PUBLIC_LOCAL_ANALYTICS_GATEWAY_KEY_CONFIG,
@@ -54,17 +61,17 @@ const localRelay = Schema.decodeUnknownOption(AnalyticsRelay)({
 export const analyticsRelayAtom = atom((get): Option.Option<AnalyticsRelay> => {
   if (apiPreset === 'localEnv') return localRelay
 
-  const fetched = get(fetchedRelaysAtom).file
-  const relays =
-    fetched && fetched.revision > bundledRelays.revision
-      ? fetched
-      : bundledRelays
+  const relays = currentRelays(get(fetchedRelaysAtom).file)
   return Option.fromNullable(
     apiPreset === 'prodEnv' ? relays.prod : relays.stage
   )
 })
 
-/** At most once a day, failed attempts included, and only for opted-in installs. Failures keep the previous relays. */
+/**
+ * At most once a day, failed attempts included, and only for opted-in installs.
+ * A fetched file replaces the relays only when it carries a valid signature and
+ * a higher revision than the one in use; anything else keeps the previous relays.
+ */
 export const refreshAnalyticsRelaysActionAtom = atom(
   null,
   (get, set): Effect.Effect<void> => {
@@ -84,7 +91,12 @@ export const refreshAnalyticsRelaysActionAtom = atom(
       const json: unknown = await response.json()
       return json
     }).pipe(
+      Effect.filterOrFail((json) => isAnalyticsRelaysSignatureValid(json)),
       Effect.flatMap(Schema.decodeUnknown(AnalyticsRelaysFile)),
+      Effect.filterOrFail(
+        (file) =>
+          file.revision > currentRelays(get(fetchedRelaysAtom).file).revision
+      ),
       Effect.timeout(Duration.seconds(10)),
       Effect.tap((file) =>
         Effect.sync(() => {

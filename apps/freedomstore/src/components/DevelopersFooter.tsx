@@ -56,7 +56,7 @@ export function DevelopersFooter({
               </span>
             </a>
             <a
-              href="https://www.vexl.foundation/"
+              href="https://vexl.foundation/"
               target="_blank"
               rel="noreferrer"
               className="link-block its-footer w-inline-block"

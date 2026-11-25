@@ -1,6 +1,6 @@
 import {type Metadata} from 'next'
 
-export const SITE_URL = 'https://www.vexl.foundation'
+export const SITE_URL = 'https://vexl.foundation'
 const DEFAULT_OG_IMAGE = '/wf/647c6ba3159f326b0305d81b_Preview.jpg'
 
 /** Title, description, icons and social cards, as Webflow sets them. */

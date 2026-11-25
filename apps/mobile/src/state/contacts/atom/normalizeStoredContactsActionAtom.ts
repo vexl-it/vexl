@@ -8,7 +8,11 @@ import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
 import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAnimationFrames'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
-import {type ContactComputedValues, type StoredContact} from '../domain'
+import {
+  type ContactComputedValues,
+  needsNormalization,
+  type StoredContact,
+} from '../domain'
 import {hashPhoneNumber} from '../utils'
 import {CONTACT_NORMALIZATION_CHUNK_SIZE} from './contactImportUtils'
 import {storedContactsAtom} from './contactsStore'
@@ -65,13 +69,6 @@ function normalizeContact(
       reportError('warn', new Error('Error while normalizing contact'))
       return Effect.succeed(markContactInvalid(contact))
     })
-  )
-}
-
-function needsNormalization(contact: StoredContact): boolean {
-  return (
-    Option.isNone(contact.computedValues) &&
-    contact.flags.invalidNumber !== 'invalid'
   )
 }
 

@@ -76,6 +76,8 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "不適切なコンテンツのため、{{name}} は削除されました。",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "クラブが無効化されました",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "{{name}} は有効でなくなりました。",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.title": "スマホから削除された連絡先",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.body": "スマホから連絡先を削除したようなので、Vexlネットワークからも外しました。オファーとリーチは更新済みです。",
   "notifications.groupNotificationRequest.subtitle": "オファーに新しい要請があります",
   "notifications.groupNotificationRequest.title": "新規要請",
   "notifications.createOfferPrompt.title": "オファーを作成する",

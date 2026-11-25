@@ -10,6 +10,7 @@ import loadContactsFromDeviceActionAtom, {
 import normalizeStoredContactsActionAtom, {
   type NormalizationProgressListener,
 } from './normalizeStoredContactsActionAtom'
+import {syncStoredContactsWithDeviceActionAtom} from './vexlOnlyContactsAtoms'
 
 type LoadContactsFromDeviceError =
   | ContactsPermissionsNotGrantedError
@@ -98,6 +99,7 @@ const loadAndNormalizeContactsFromDeviceActionAtom = atom(
             },
           })
         )
+        set(syncStoredContactsWithDeviceActionAtom)
 
         return true
       }).pipe(

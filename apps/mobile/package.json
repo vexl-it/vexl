@@ -55,7 +55,7 @@
     "bunshi": "^2.1.5",
     "crypto-browserify": "^3.12.1",
     "dayjs": "^1.11.11",
-    "effect": "^3.20.0",
+    "effect": "^3.22.1",
     "entities": "~2.0.0",
     "expo": "~57.0.24",
     "expo-application": "~57.0.2",

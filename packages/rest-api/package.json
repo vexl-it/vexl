@@ -28,7 +28,7 @@
     "@effect/rpc": "^0.72.2",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
-    "effect": "^3.20.0"
+    "effect": "^3.22.1"
   },
   "prettier": "@vexl-next/prettier-config"
 }

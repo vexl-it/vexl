@@ -43,7 +43,7 @@
     "@vexl-next/server-utils": "0.0.0",
     "bullmq": "^5.52.1",
     "dotenv": "^16.4.5",
-    "effect": "^3.20.0",
+    "effect": "^3.22.1",
     "expo-server-sdk": "^5.0.0",
     "ioredis": "^5.4.1"
   }

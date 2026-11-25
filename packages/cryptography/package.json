@@ -19,7 +19,7 @@
     "@noble/curves": "^1.9.7",
     "@noble/hashes": "^1.8.0",
     "asn1.js": "^5.4.1",
-    "effect": "^3.20.0",
+    "effect": "^3.22.1",
     "libsodium-wrappers": "^0.8.0",
     "react-native-get-random-values": "^1.8.0"
   },

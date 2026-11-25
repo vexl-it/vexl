@@ -89,7 +89,7 @@
     "fast-equals": "^5.2.2",
     "fp-ts": "^2.13.1",
     "group-items": "^2.2.1",
-    "i18next": "^25.10.10",
+    "i18next": "^26.3.4",
     "intl-pluralrules": "^2.0.1",
     "jest-expo": "~57.0.4",
     "join-path": "^1.1.1",

@@ -19,6 +19,7 @@ export {
   cappedCounter,
   dayOf,
   isoWeekStart,
+  mostOffersVisible,
   updatedDayFor,
   utcDaysBetween,
 } from './buckets'

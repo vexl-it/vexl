@@ -12,6 +12,7 @@ import {
   cappedCounter,
   dayOf,
   isoWeekStart,
+  mostOffersVisible,
   updatedDayFor,
   utcDaysBetween,
 } from './buckets'
@@ -157,6 +158,23 @@ describe('bucketOffersVisible', () => {
     expect(bucketOffersVisible(21)).toBe('21to50')
     expect(bucketOffersVisible(50)).toBe('21to50')
     expect(bucketOffersVisible(51)).toBe('51plus')
+  })
+})
+
+describe('mostOffersVisible', () => {
+  it('starts from the first load, also an empty one', () => {
+    expect(mostOffersVisible(undefined, 0)).toBe('0')
+    expect(mostOffersVisible(undefined, 7)).toBe('6to20')
+  })
+
+  it('rises with a fuller load', () => {
+    expect(mostOffersVisible('0', 3)).toBe('1to5')
+    expect(mostOffersVisible('6to20', 60)).toBe('51plus')
+  })
+
+  it('keeps the fullest load when a later one is emptier', () => {
+    expect(mostOffersVisible('21to50', 0)).toBe('21to50')
+    expect(mostOffersVisible('51plus', 30)).toBe('51plus')
   })
 })
 

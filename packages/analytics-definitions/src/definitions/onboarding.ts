@@ -38,7 +38,7 @@ export const onboardingJourney = defineJourney({
     existingAccount: Schema.optional(Schema.Boolean),
     registeredAfter: Schema.optional(DaysBucket),
     contactsImport: Schema.optional(ContactsImportOutcome),
-    firstMarketplaceLoad: Schema.optional(OffersVisibleBucket),
+    offersVisible: Schema.optional(OffersVisibleBucket),
     offerOpened: Schema.optional(Schema.Boolean),
     activation: Schema.optional(ActivationKind),
     activatedAfter: Schema.optional(DaysBucket),

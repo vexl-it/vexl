@@ -1,4 +1,4 @@
-import {Schema} from 'effect'
+import {Order, Schema} from 'effect'
 import {
   DayString,
   type AggregationPeriod,
@@ -85,6 +85,18 @@ export const bucketOffersVisible = (count: number): OffersVisibleBucket => {
   if (count <= 50) return '21to50'
   return '51plus'
 }
+
+const byOffersVisible = Order.mapInput(
+  Order.number,
+  (bucket: OffersVisibleBucket) => OffersVisibleBucket.literals.indexOf(bucket)
+)
+
+/** The fullest load so far: `previous`, or a load of `count` offers if larger. */
+export const mostOffersVisible = (
+  previous: OffersVisibleBucket | undefined,
+  count: number
+): OffersVisibleBucket =>
+  Order.max(byOffersVisible)(previous ?? '0', bucketOffersVisible(count))
 
 export const RequestCountBucket = Schema.Literal('1', '2to5', '6plus')
 export type RequestCountBucket = typeof RequestCountBucket.Type

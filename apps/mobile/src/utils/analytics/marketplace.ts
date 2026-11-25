@@ -13,7 +13,7 @@ import {
 import {reportAfterOpenActionAtom} from './afterOpenAction'
 import {analyticsActionAtom} from './analyticsActionAtom'
 import {
-  reportFirstMarketplaceLoadActionAtom,
+  reportOffersVisibleInOnboardingActionAtom,
   updateOnboardingActionAtom,
 } from './onboarding'
 
@@ -25,7 +25,7 @@ const isMainMarketplaceOffer = (offer: OneOfferInState): boolean =>
 export const reportMarketplaceLoadedActionAtom = analyticsActionAtom(
   (get, set, offers: readonly OneOfferInState[]) => {
     const mainOffersCount = Array.filter(offers, isMainMarketplaceOffer).length
-    set(reportFirstMarketplaceLoadActionAtom, mainOffersCount)
+    set(reportOffersVisibleInOnboardingActionAtom, mainOffersCount)
     set(reportOffersVisibleInWeekActionAtom, mainOffersCount)
   }
 )

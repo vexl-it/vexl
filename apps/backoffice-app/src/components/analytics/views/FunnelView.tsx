@@ -133,10 +133,10 @@ function Funnel({data}: {data: FunnelData}) {
           )}
         </ChartCard>
         <ChartCard
-          title="Activation by offers seen on the first marketplace visit"
+          title="Activation by most offers seen in the marketplace"
           population="client"
           cohorts={data.cohorts}
-          note="New registrations that imported contacts, grouped by how many main-marketplace offers loaded the first time they opened the marketplace; each bar is the % of that group that activated. We record what loaded, not whether they looked at it."
+          note="New registrations that imported contacts, grouped by the most main-marketplace offers the marketplace showed them in their first 37 days after first opening the app; each bar is the % of that group that activated. We record what loaded, not whether they looked at it. An install that activated before its first offers arrived still counts in the fuller group."
         >
           <BucketBarChart
             series={ACTIVATED_SERIES}

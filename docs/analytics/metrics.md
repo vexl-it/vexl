@@ -53,10 +53,10 @@ Does a new install get from first open to real use, and where does it stop? Grou
 - How the contact import ended: imported, skipped, access denied, failed, left unfinished, never reached.
 - Activation rate per period of first open, main and Clubs only, each period shown once all its installs have had their full time.
 - Time from first open to registration: same day, next day, 2 to 7 days, 8 days or more. From registration to activation: same day, next day, 2 to 7 days, 8 to 30 days.
-- Activation by how many main offers loaded on the first marketplace visit (0, 1 to 5, 6 to 20, 21 to 50, over 50), for new registrations that imported contacts, with the size of each group.
+- Activation by the most main offers the marketplace showed them (0, 1 to 5, 6 to 20, 21 to 50, over 50), for new registrations that imported contacts, with the size of each group.
 - New registrations from our servers, as a trend per period. Counts all users and is never divided by the funnel.
 
-The split by "offers seen on first load" is the chart we expect to matter most. If installs with an empty marketplace never activate, liquidity is the activation problem.
+The split by "most offers seen" is the chart we expect to matter most. If installs with an empty marketplace never activate, liquidity is the activation problem. An install that activates by posting into an empty marketplace and sees offers only later counts in the fuller group, so the empty group reads slightly worse than it is.
 
 ### 2. Marketplace liquidity
 
@@ -64,7 +64,7 @@ Can people find someone to trade with where they live?
 
 - Active offers now, active offers per period by type (buy / sell), and offers created per period by type. From servers, active offers without a platform split.
 - Median number of users an offer reaches, per period. From servers, no platform split. Medians cannot be combined, so all countries shows the three largest markets and "Other" shows nothing.
-- Per week, the share of installs that opened the marketplace and saw no main offers; all countries shows the three largest markets next to the total. For the latest complete week, a table per country of how many main offers they saw: 0, 1 to 5, 6 to 20, 21 to 50, over 50.
+- Per week, the share of installs that opened the marketplace and saw no main offers; all countries shows the three largest markets next to the total. For the latest complete week, a table per country of the most main offers they saw: 0, 1 to 5, 6 to 20, 21 to 50, over 50.
 - Requests sent. From servers. Their outcomes come from installs.
 - From the offer side: time to first request within 30 days, for all offers, main only vs also shared to Clubs, and buy vs sell. Offers deleted before any request are left out.
 - From the request side: outcome per period (approved, rejected, cancelled, no answer within 14 days) and how long the answer took, main vs Club.

@@ -74,7 +74,7 @@ export const loadClubs = (scope: QueryScope): QueryResult<ClubsData> =>
               'existingAccount',
               'clubJoin',
               'contactsImport',
-              'firstMarketplaceLoad',
+              'offersVisible',
               'offerOpened',
               'activation',
               'clubActivation'

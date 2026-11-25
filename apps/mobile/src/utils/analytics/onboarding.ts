@@ -1,6 +1,6 @@
 import {
   bucketDays,
-  bucketOffersVisible,
+  mostOffersVisible,
   utcDaysBetween,
 } from '@vexl-next/analytics-definitions/src/buckets'
 import {
@@ -126,16 +126,14 @@ export const reportClubJoinedActionAtom = analyticsActionAtom((get, set) => {
   }))
 })
 
-export const reportFirstMarketplaceLoadActionAtom = analyticsActionAtom(
+export const reportOffersVisibleInOnboardingActionAtom = analyticsActionAtom(
   (get, set, mainOffersCount: number) => {
-    set(updateOnboardingActionAtom, (current) =>
-      Option.exists(
-        current,
-        (state) => state.firstMarketplaceLoad !== undefined
-      )
-        ? {}
-        : {firstMarketplaceLoad: bucketOffersVisible(mainOffersCount)}
-    )
+    set(updateOnboardingActionAtom, (current) => ({
+      offersVisible: mostOffersVisible(
+        Option.getOrUndefined(current)?.offersVisible,
+        mainOffersCount
+      ),
+    }))
   }
 )
 

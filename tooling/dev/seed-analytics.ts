@@ -504,22 +504,20 @@ const onboarding = (
     })
 
   const loaded = chance(contactsImport === 'completed' ? 0.9 : 0.4)
-  const firstMarketplaceLoad = loaded
+  const offersVisible = loaded
     ? offersVisibleFor(
         install.country,
         contactsImport === 'completed' ? 0 : 0.3
       )
     : undefined
-  if (firstMarketplaceLoad !== undefined) {
-    at(registeredMs, {firstMarketplaceLoad})
-    if (firstMarketplaceLoad !== '0' && chance(0.6))
+  if (offersVisible !== undefined) {
+    at(registeredMs, {offersVisible})
+    if (offersVisible !== '0' && chance(0.6))
       at(dayAfter(registeredMs, between(0, 3)), {offerOpened: true})
   }
 
   const activated = chance(
-    firstMarketplaceLoad === undefined
-      ? 0.02
-      : ACTIVATION_BY_OFFERS[firstMarketplaceLoad]
+    offersVisible === undefined ? 0.02 : ACTIVATION_BY_OFFERS[offersVisible]
   )
   const activatedAfter = pick<DaysBucket>([
     ['d0', 0.38],

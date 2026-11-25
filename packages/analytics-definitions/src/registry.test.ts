@@ -17,7 +17,7 @@ const samplePayloads: Record<string, object> = {
     existingAccount: false,
     registeredAfter: 'd0',
     contactsImport: 'completed',
-    firstMarketplaceLoad: '6to20',
+    offersVisible: '6to20',
     offerOpened: true,
     activation: 'offer',
     activatedAfter: 'd2To7',

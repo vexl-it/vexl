@@ -82,7 +82,7 @@ function Liquidity({data}: {data: LiquidityData}) {
           title="Installs that saw no main-marketplace offers, per week"
           population="client"
           className="lg:col-span-2"
-          note="% of installs that opened the marketplace that week and had no main-marketplace offers to see. All countries shows the three largest markets next to the total."
+          note="% of installs that opened the marketplace that week and never had a main-marketplace offer to see. All countries shows the three largest markets next to the total."
           table={seriesTable(emptySeries, data.emptyMarketplace.points, 'pct')}
         >
           <TimeSeriesChart
@@ -94,7 +94,7 @@ function Liquidity({data}: {data: LiquidityData}) {
         <ChartCard
           title={`Offers seen in the main marketplace, by country · week of ${data.lastSettledWeek}`}
           population="client"
-          note="Installs grouped by how many main-marketplace offers loaded on their first marketplace visit that week; cells are % of the country's installs. We record what loaded, not whether the user looked at it. Countries with fewer than 20 installs show <20 and no percentages."
+          note="Installs grouped by the most main-marketplace offers the marketplace showed them that week; cells are % of the country's installs. We record what loaded, not whether the user looked at it. Countries with fewer than 20 installs show <20 and no percentages."
         >
           <DataTable data={data.visibleByCountry} />
         </ChartCard>

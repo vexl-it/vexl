@@ -29,7 +29,7 @@ const fullPayloads: Record<string, object> = {
     existingAccount: false,
     registeredAfter: 'd2To7',
     contactsImport: 'completed',
-    firstMarketplaceLoad: '21to50',
+    offersVisible: '21to50',
     offerOpened: true,
     activation: 'request',
     activatedAfter: 'd8Plus',

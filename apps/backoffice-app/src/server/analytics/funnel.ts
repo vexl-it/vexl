@@ -69,7 +69,7 @@ export const loadFunnel = (scope: QueryScope): QueryResult<FunnelData> =>
               'step',
               'existingAccount',
               'contactsImport',
-              'firstMarketplaceLoad',
+              'offersVisible',
               'offerOpened',
               'activation',
               'clubActivation',
@@ -149,7 +149,7 @@ export const loadFunnel = (scope: QueryScope): QueryResult<FunnelData> =>
       [
         'Marketplace loaded',
         (state) =>
-          isNewRegistration(state) && state.firstMarketplaceLoad !== undefined,
+          isNewRegistration(state) && state.offersVisible !== undefined,
       ],
       [
         'Saw at least 1 main offer',
@@ -188,13 +188,12 @@ export const loadFunnel = (scope: QueryScope): QueryResult<FunnelData> =>
       OFFERS_SEEN_GROUPS,
       ([label, bucket]) => {
         const installs = total(
-          (state) =>
-            importedContacts(state) && state.firstMarketplaceLoad === bucket
+          (state) => importedContacts(state) && state.offersVisible === bucket
         )
         const activated = total(
           (state) =>
             importedContacts(state) &&
-            state.firstMarketplaceLoad === bucket &&
+            state.offersVisible === bucket &&
             state.activation !== undefined
         )
         return {label, installs, activated: percentOrNull(activated, installs)}
@@ -297,7 +296,7 @@ export const loadFunnel = (scope: QueryScope): QueryResult<FunnelData> =>
   })
 
 export const sawMainOffer = (state: Onboarding): boolean =>
-  state.firstMarketplaceLoad !== undefined && state.firstMarketplaceLoad !== '0'
+  state.offersVisible !== undefined && state.offersVisible !== '0'
 
 const OFFERS_SEEN_GROUPS: ReadonlyArray<
   readonly [string, OffersVisibleBucket]

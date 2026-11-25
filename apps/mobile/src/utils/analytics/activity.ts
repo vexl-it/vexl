@@ -1,8 +1,8 @@
 import {
   bucketClubCount,
-  bucketOffersVisible,
   bucketStartDay,
   bucketTenure,
+  mostOffersVisible,
   type TenureBucket,
 } from '@vexl-next/analytics-definitions/src/buckets'
 import {
@@ -109,8 +109,7 @@ export const reportOffersVisibleInWeekActionAtom = analyticsActionAtom(
   (get, set, mainOffersCount: number) => {
     set(activityWeeklyAtom, (state) => ({
       ...state,
-      offersVisible:
-        state.offersVisible ?? bucketOffersVisible(mainOffersCount),
+      offersVisible: mostOffersVisible(state.offersVisible, mainOffersCount),
     }))
   }
 )

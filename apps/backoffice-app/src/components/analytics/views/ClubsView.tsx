@@ -48,7 +48,7 @@ function Clubs({data}: {data: ClubsData}) {
         title="Do Club joiners reach the main marketplace?"
         population="client"
         cohorts={data.cohorts}
-        note="New registrations, split by whether and when they joined a Club in their first 37 days after first opening the app; columns are % of each group. — = can't happen for that group. For installs that registered more than 7 days after first opening, the 30-day activation window is cut short. Saw at least 1 main offer = their first marketplace visit showed at least one main-marketplace offer."
+        note="New registrations, split by whether and when they joined a Club in their first 37 days after first opening the app; columns are % of each group. — = can't happen for that group. For installs that registered more than 7 days after first opening, the 30-day activation window is cut short. Saw at least 1 main offer = the marketplace showed them at least one main-marketplace offer in those 37 days."
       >
         <DataTable data={data.conversion} />
       </ChartCard>

@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@vexl-next/website-utils": "0.0.0",
-    "effect": "^3.20.0",
+    "effect": "^3.22.1",
     "next": "^16.4.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

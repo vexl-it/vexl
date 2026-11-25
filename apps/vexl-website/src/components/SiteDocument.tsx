@@ -51,7 +51,7 @@ export async function SiteDocument({
         {children}
         <AnchorScroll />
         <DevCopyEditor />
-        <FathomAnalytics siteId="TODO_VEXL_IT_SITE_ID" siteUrl={SITE_URL} />
+        <FathomAnalytics siteId="ZOUNBVYL" siteUrl={SITE_URL} />
       </body>
     </html>
   )

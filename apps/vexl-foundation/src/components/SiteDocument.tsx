@@ -47,10 +47,7 @@ export async function SiteDocument({
       <body className={bodyClassName}>
         {children}
         <DevCopyEditor />
-        <FathomAnalytics
-          siteId="TODO_VEXL_FOUNDATION_SITE_ID"
-          siteUrl={SITE_URL}
-        />
+        <FathomAnalytics siteId="RPHOEAFL" siteUrl={SITE_URL} />
       </body>
     </html>
   )

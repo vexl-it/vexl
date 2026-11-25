@@ -1,0 +1,212 @@
+/* Site-specific styles not covered by the vendored Webflow export.
+ * Selectors intentionally outrank webflow.css, which imports alphabetically after this file. */
+
+/* Replace Webflow IX2 hover interactions with pure CSS transitions */
+.button-blue {
+  cursor: pointer;
+  transition: background-color 500ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.button-blue:hover,
+a:focus-visible .button-blue {
+  background-color: #ff6338;
+  transition-duration: 300ms;
+}
+
+.button-blue .button-text-03 {
+  transform: translate3d(0, 0%, 0);
+  transition: transform 500ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.button-blue .button-text-03.is-text-absolute {
+  transform: translate3d(0, 200%, 0);
+  color: #f0f0f0;
+}
+
+.button-blue:hover .button-text-03,
+a:focus-visible .button-blue .button-text-03 {
+  transform: translate3d(0, -200%, 0);
+  transition-duration: 300ms;
+}
+
+.button-blue:hover .button-text-03.is-text-absolute,
+a:focus-visible .button-blue .button-text-03.is-text-absolute {
+  transform: translate3d(0, 0%, 0);
+  color: #fff;
+  transition-duration: 300ms;
+}
+
+.button-block-19 {
+  cursor: pointer;
+}
+
+.button-block-19 .button-text-02 {
+  transform: translate3d(0, 0%, 0);
+  transition: transform 500ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.button-block-19 .button-text-02.is-absolute {
+  transform: translate3d(0, 150%, 0);
+}
+
+.button-block-19:hover .button-text-02,
+a:focus-visible .button-block-19 .button-text-02 {
+  transform: translate3d(0, -150%, 0);
+  transition-duration: 300ms;
+}
+
+.button-block-19:hover .button-text-02.is-absolute,
+a:focus-visible .button-block-19 .button-text-02.is-absolute {
+  transform: translate3d(0, 0%, 0);
+  transition-duration: 300ms;
+}
+
+.button-block-25 {
+  cursor: pointer;
+  background-color: transparent;
+  transition: background-color 500ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.button-block-25 .button-text-25 {
+  opacity: 1;
+  transform: translate3d(0%, 0, 0);
+  transition:
+    transform 500ms cubic-bezier(0.165, 0.84, 0.44, 1),
+    opacity 500ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.button-block-25 .button-text-25-icon {
+  opacity: 0;
+  color: #f0f0f0;
+  transform: translate3d(-200%, 0, 0);
+  transition:
+    transform 500ms cubic-bezier(0.165, 0.84, 0.44, 1),
+    opacity 500ms cubic-bezier(0.165, 0.84, 0.44, 1),
+    color 500ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.button-block-25:hover,
+a:focus-visible .button-block-25 {
+  background-color: #ff6337;
+}
+
+.button-block-25:hover .button-text-25,
+a:focus-visible .button-block-25 .button-text-25 {
+  opacity: 0;
+  transform: translate3d(150%, 0, 0);
+}
+
+.button-block-25:hover .button-text-25-icon,
+a:focus-visible .button-block-25 .button-text-25-icon {
+  opacity: 1;
+  color: #000;
+  transform: translate3d(0%, 0, 0);
+}
+
+.button-block-43 {
+  cursor: pointer;
+}
+
+.button-block-43 .button-block-43-overlay {
+  width: 0%;
+  height: 100%;
+  transition: width 300ms cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+
+.button-block-43:hover .button-block-43-overlay,
+a:focus-visible .button-block-43 .button-block-43-overlay {
+  width: 100%;
+}
+
+/* Align guide step descriptions when one title wraps onto two lines */
+@media (min-width: 480px) {
+  .guide-card .h2 {
+    min-height: 2lh;
+  }
+}
+
+/* Programmatic anchor-scroll focus keeps keyboard tabbing in the target section without a ring */
+[tabindex='-1']:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Inline **bold** highlight inside advertising copy matches Webflow's .text-span */
+.text-xl strong {
+  color: #ff6337;
+  font-weight: inherit;
+}
+
+/* Fathom analytics privacy notice at the bottom of the footer */
+.footer-privacy {
+  max-width: 56rem;
+  margin-top: 2rem;
+  margin-bottom: 0;
+  color: #c2d0e3;
+  opacity: 0.5;
+  font-family: Aeonik, Arial, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* 404 page */
+.not-found-wrap {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+  background-color: #0a0b14;
+  color: #c2d0e3;
+  font-family: Aeonik, Arial, sans-serif;
+}
+
+.not-found-code {
+  margin: 0;
+  color: #193fff;
+  font-size: 5rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.2rem;
+}
+
+.not-found-subtitle {
+  margin: 0;
+  max-width: 28rem;
+  color: #ffffff80;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button-blue,
+  .button-blue .button-text-03,
+  .button-block-19 .button-text-02,
+  .button-block-25,
+  .button-block-25 .button-text-25,
+  .button-block-25 .button-text-25-icon,
+  .button-block-43 .button-block-43-overlay {
+    transition: none;
+  }
+
+  .resource-group .sticky-title-wrapper {
+    height: auto;
+  }
+
+  .sticky-title-wrapper .sticky-title-container {
+    position: static;
+    height: auto;
+    padding-bottom: 6rem;
+  }
+
+  .sticky-title-wrapper .sticky-title-inner {
+    gap: 4rem;
+  }
+
+  .sticky-title-inner .sticky-title-el.is--stacked {
+    position: static;
+    visibility: visible;
+  }
+}

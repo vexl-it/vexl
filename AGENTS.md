@@ -25,11 +25,12 @@ When changing any UI / UX in the mobile app or in the ui package you must read @
 - apps/mobile - Expo mobile app
 - apps/vexl-website - the vexl.it marketing site (Next.js); non-developers change it through the `updating-website` skill
 - apps/vexl-foundation - the vexl.foundation site (Next.js); non-developers change it through the `updating-website` skill
+- apps/freedomstore - the freedomstore.io site (Next.js); non-developers change it through the `updating-website` skill
 - packages/server-utils - shared utilities for backend services
 - packages/ui - shared UI components and themes for mobile app
 - packages/domain - shared domain logic, types, schemas, and similar for both backend and mobile app
 - packages/cryptography - shared cryptography utilities for both backend and mobile app
-- packages/website-utils - shared code of the two websites (apps/vexl-website, apps/vexl-foundation): copy format and rendering, dev copy editor, CSP headers, setup and screenshot scripts
+- packages/website-utils - shared code of the websites (apps/vexl-website, apps/vexl-foundation, apps/freedomstore): copy format and rendering, dev copy editor, CSP headers, setup and screenshot scripts
 - packages/generic-utils - shared generic utilities for both backend and mobile app - should not depend on any of the other vexl packages
 - packages/localization - shared localization utilities, types, and similar for both backend and mobile app
 - packages/geocoding-db - standalone geocoding database used by location-service: schema, queries, and migrations. Lives on its own Postgres instance (`GEOCODING_DB_*` env, never the shared `DB_URL`) so geocoding never shares resources with vexl user data. Details in packages/geocoding-db/README.md.

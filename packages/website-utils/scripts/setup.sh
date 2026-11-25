@@ -3,7 +3,7 @@
 # Prepares a laptop or a cloud dev environment (Cursor) to run and screenshot
 # a website app. Installs only that app's part of the monorepo. Safe to re-run.
 set -euo pipefail
-app="${1:?Usage: setup.sh <app>, for example vexl-website or vexl-foundation}"
+app="${1:?Usage: setup.sh <app>, for example vexl-website, vexl-foundation or freedomstore}"
 cd "$(dirname "$0")/../../.."
 [ -d "apps/$app" ] || { echo "setup: no app apps/$app" >&2; exit 1; }
 

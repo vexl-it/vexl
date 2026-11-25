@@ -28,7 +28,6 @@ jobs:
     outputs:
       image_ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
     permissions:
-      packages: write
       contents: read
       id-token: write
     steps:
@@ -58,13 +57,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build and push image
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
         with:
@@ -77,8 +69,6 @@ jobs:
           cache-from: type=gha,scope=freedomstore
           cache-to: type=gha,mode=max,scope=freedomstore
           tags: |
-            ghcr.io/vexl-it/${{ env.IMAGE_NAME }}:latest
-            ghcr.io/vexl-it/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           build-args: |
             SERVICE_VERSION=${{ github.sha }}

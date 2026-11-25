@@ -27,7 +27,7 @@ const footerLinks = [
     text: 'footer.nostr.text',
   },
   {
-    href: 'https://satoshilabs.visualbook.pro/en/vexl',
+    href: 'https://vexl.it/brand',
     icon: '/wf/64623cf0bb7a7b00aee45610_press-kit.svg',
     title: 'footer.brandManual.title',
     text: 'footer.brandManual.text',

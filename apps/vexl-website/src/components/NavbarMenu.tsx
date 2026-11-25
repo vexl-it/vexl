@@ -181,7 +181,7 @@ export function NavbarMenu({
       <a href={href('/faq')} className={navLinkClass('/faq')}>
         {t.faq}
       </a>
-      <a href="https://www.vexl.foundation/" className={navLinkClass('')}>
+      <a href="https://vexl.foundation/" className={navLinkClass('')}>
         {t.foundation}
       </a>
       <a

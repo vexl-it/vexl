@@ -70,6 +70,7 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
           dbEffectToRun: ({limit, decodedNextPageToken}) =>
             contactDb.findCommonFriendsPaginated({
               ownerHash: security.serverHash,
+              ownerPublicKey: security.publicKey,
               publicKeys: pubKeysV1,
               publicKeysV2: pubKeysV2,
               limit,

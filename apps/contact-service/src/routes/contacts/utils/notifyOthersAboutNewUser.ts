@@ -1,30 +1,24 @@
-import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Array, Effect} from 'effect'
-import {UserNotificationService} from '../../../services/UserNotificationService'
+import {
+  UserNotificationService,
+  type NotifyOthersAboutNewUserParams,
+} from '../../../services/UserNotificationService'
 
-export const notifyOthersAboutNewUserForked = ({
-  importedHashes,
-  ownerHash,
-}: {
-  importedHashes: readonly ServerHashedNumber[]
-  ownerHash: ServerHashedNumber
-}): Effect.Effect<void, never, UserNotificationService> =>
+export const notifyOthersAboutNewUserForked = (
+  params: NotifyOthersAboutNewUserParams
+): Effect.Effect<void, never, UserNotificationService> =>
   Effect.gen(function* (_) {
     const userNotificationService = yield* _(UserNotificationService)
 
-    yield* _(
-      userNotificationService.notifyOthersAboutNewUser(
-        importedHashes,
-        ownerHash
-      )
-    )
+    yield* _(userNotificationService.notifyOthersAboutNewUser(params))
 
     yield* _(Effect.logInfo('Notified others about new user'))
   }).pipe(
     Effect.withSpan('Notify others about new user', {
       attributes: {
-        hashesLength: Array.length(importedHashes),
-        userHash: ownerHash,
+        firstLevelHashesLength: Array.length(params.firstLevelHashes),
+        secondLevelHashesLength: Array.length(params.secondLevelHashes),
+        userHash: params.ownerHash,
       },
     }),
     Effect.forkDaemon,

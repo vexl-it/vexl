@@ -29,6 +29,8 @@ import {
   CreateUserRequest,
   DeactivateClubJoinLinkRequest,
   DeactivateClubJoinLinkResponse,
+  DeleteAccountRequest,
+  DeleteAccountRouteMissingError,
   EraseUserFromNetworkRequest,
   EraseUserFromNetworkResponse,
   FetchCommonConnectionsPaginatedRequest,
@@ -55,7 +57,9 @@ import {
   ListClubLinksRequest,
   ListClubLinksResponse,
   LoggedInOnAnotherDeviceError,
+  MAX_PHONE_NUMBERS_PER_ACCOUNT,
   MemberAlreadyInClubError,
+  PhoneNumberLimitReachedError,
   RefreshUserRequest,
   ReportClubLimitReachedError,
   ReportClubRequest,
@@ -86,6 +90,7 @@ export const CreateUserEndpoint = HttpApiEndpoint.post(
   .setPayload(CreateUserRequest)
   .addSuccess(NoContentResponse, {status: 201})
   .addError(InvalidLoginSessionProofError, {status: 403})
+  .addError(PhoneNumberLimitReachedError, {status: 400})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const RefreshUserEndpoint = HttpApiEndpoint.post(
@@ -133,6 +138,20 @@ export const DeleteUserEndpoint = HttpApiEndpoint.del(
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 1)
 
+export const DeleteAccountEndpoint = HttpApiEndpoint.del(
+  'deleteAccount',
+  '/api/v1/users/me/account'
+)
+  .setHeaders(CommonAndSecurityHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(DeleteAccountRequest)
+  .addSuccess(NoContentResponse)
+  .addError(InvalidLoginSessionProofError, {status: 403})
+  .addError(LoggedInOnAnotherDeviceError, {status: 409})
+  .addError(DeleteAccountRouteMissingError)
+  // Asked through every number of the account
+  .annotate(MaxExpectedDailyCall, MAX_PHONE_NUMBERS_PER_ACCOUNT)
+
 export const EraseUserFromNetworkEndpoint = HttpApiEndpoint.del(
   'eraseUserFromNetwork',
   '/api/v1/users/erase'
@@ -154,6 +173,7 @@ export const ImportContactsEndpoint = HttpApiEndpoint.post(
   .addSuccess(ImportContactsResponse)
   .addError(InitialImportContactsQuotaReachedError, {status: 429})
   .addError(ImportContactsQuotaReachedError, {status: 429})
+  .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
@@ -165,6 +185,7 @@ export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
   .setUrlParams(FetchMyContactsPaginatedRequest)
   .addSuccess(FetchMyContactsPaginatedResponse)
   .addError(InvalidNextPageTokenError, {status: 400})
+  .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 500)
 
 export const FetchCommonConnectionsPaginatedEndpoint = HttpApiEndpoint.post(
@@ -311,6 +332,7 @@ const UserApiGroup = HttpApiGroup.make('User')
   .add(RestoreUserEndpoint)
   .add(UpdateNotificationTokenEndpoint)
   .add(DeleteUserEndpoint)
+  .add(DeleteAccountEndpoint)
   .add(EraseUserFromNetworkEndpoint)
 
 const ContactApiGroup = HttpApiGroup.make('Contact')

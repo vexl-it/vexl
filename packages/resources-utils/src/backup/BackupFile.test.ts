@@ -3,6 +3,7 @@ import {generateKeyPair} from '@vexl-next/cryptography/src/operations/cryptobox'
 import {Effect, Either, Schema} from 'effect'
 import {
   BackupFile,
+  BackupFileFromJson,
   BackupPin,
   decryptBackupFile,
   encryptBackupFile,
@@ -62,6 +63,56 @@ describe('backup file encryption', () => {
       )
     )
     expect(decrypted).toEqual(backup)
+  })
+
+  it('round-trips the extra phone numbers', async () => {
+    const backup = await makeBackup()
+    const extraPhoneNumber = (phoneNumber: string, hash: string): unknown => ({
+      phoneNumber,
+      sessionCredentials: {
+        ...backup.session.sessionCredentials,
+        hash,
+        vexlAuthHeader: {
+          ...backup.session.sessionCredentials.vexlAuthHeader,
+          data: {
+            ...backup.session.sessionCredentials.vexlAuthHeader.data,
+            hash,
+          },
+        },
+      },
+    })
+    const withExtraNumbers = Schema.validateSync(BackupFile)({
+      ...backup,
+      session: {
+        ...backup.session,
+        extraPhoneNumbers: [
+          extraPhoneNumber('+420777777777', 'second'),
+          extraPhoneNumber('+421905123456', 'third'),
+        ],
+      },
+    })
+    const keyPair = await generateKeyPair()
+
+    const decrypted = await Effect.runPromise(
+      encryptBackupFile({
+        backup: withExtraNumbers,
+        pin,
+        publicKey: keyPair.publicKey,
+      }).pipe(Effect.flatMap((file) => decryptBackupFile({file, pin, keyPair})))
+    )
+
+    expect(decrypted).toEqual(withExtraNumbers)
+    expect(decrypted.session.extraPhoneNumbers).toHaveLength(2)
+  })
+
+  it('decodes a backup made before accounts had several numbers', async () => {
+    const backup = await makeBackup()
+    const json = Schema.encodeSync(BackupFileFromJson)(backup)
+
+    expect(json).not.toContain('extraPhoneNumbers')
+    const decoded = Schema.decodeSync(BackupFileFromJson)(json)
+    expect(decoded).toEqual(backup)
+    expect(decoded.session.extraPhoneNumbers).toBeUndefined()
   })
 
   it('fails with BackupFileWrongPinError for a wrong PIN', async () => {

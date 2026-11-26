@@ -5,7 +5,7 @@
  * UI and notes are mocked.
  */
 import {Array, Effect, Schema} from 'effect'
-import {createStore, type ExtractAtomArgs} from 'jotai'
+import {createStore, type Atom, type ExtractAtomArgs, type Getter} from 'jotai'
 import {Alert} from 'react-native'
 
 jest.mock('react-native-mmkv')
@@ -110,7 +110,13 @@ jest.mock('../../notes/atoms/notesState', () => {
 })
 jest.mock('../../session', () => {
   const {atom} = jest.requireActual('jotai')
-  return {sessionDataOrDummyAtom: atom({privateKey: {}, keyPairV2: {}})}
+  return {
+    sessionDataOrDummyAtom: atom({
+      privateKey: {},
+      keyPairV2: {},
+      sessionCredentials: {hash: 'own-number-hash'},
+    }),
+  }
 })
 jest.mock('../../marketplace/atoms/offersMissingOnServer', () => ({
   reencryptSingleOfferMissingOnServerWhenEditingActionAtom: null,
@@ -173,6 +179,15 @@ jest.mock('../../../api', () => {
       },
       offer: {},
     }),
+  }
+})
+jest.mock('../../../api/contactApiForSession', () => {
+  const {atom} = jest.requireActual('jotai')
+  const {apiAtom} = jest.requireMock<{
+    apiAtom: Atom<{contact: unknown}>
+  }>('../../../api')
+  return {
+    contactApisAtom: atom((get: Getter) => [get(apiAtom).contact]),
   }
 })
 

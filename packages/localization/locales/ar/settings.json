@@ -61,8 +61,6 @@
   "editProfileScreen.addIdentity.button": "أضف الهوية",
   "editProfileScreen.vexlAlias.title": "اسمك المستعار في Vexl",
   "editProfileScreen.vexlAlias.subtitle": "هكذا يراك الآخرون. تبقى هويتك الحقيقية مخفية حتى تختار كشفها.",
-  "editProfileScreen.phoneNumber.title": "رقم الهاتف",
-  "editProfileScreen.phoneNumber.subtitle": "رقم هاتفك يبقى خاصًا. لا يراه أحد إلا إذا شاركته.",
   "editProfileScreen.spokenLanguages.title": "اللغات التي تتحدثها",
   "editProfileScreen.spokenLanguages.subtitle": "دع الآخرين يعرفون اللغات التي ترتاح للتداول بها.",
   "editProfileScreen.identityPhoto.title": "أضف صورة",

@@ -1,3 +1,4 @@
+import {HttpApiSchema} from '@effect/platform/index'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {
@@ -79,6 +80,14 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   }),
 }) {}
 
+export const MAX_PHONE_NUMBERS_PER_ACCOUNT = 5
+
+export class PhoneNumberLimitReachedError extends Schema.TaggedError<PhoneNumberLimitReachedError>(
+  'PhoneNumberLimitReachedError'
+)('PhoneNumberLimitReachedError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
 export class LoggedInOnAnotherDeviceError extends Schema.TaggedError<LoggedInOnAnotherDeviceError>(
   'LoggedInOnAnotherDeviceError'
 )('LoggedInOnAnotherDeviceError', {
@@ -146,6 +155,17 @@ export const RestoreUserRequest = Schema.Struct({
   }),
 })
 export type RestoreUserRequest = typeof RestoreUserRequest.Type
+
+export const DeleteAccountRequest = Schema.Struct({
+  loginSessionId: LoginSessionId,
+  loginSessionProof: LoginSessionProof,
+})
+export type DeleteAccountRequest = typeof DeleteAccountRequest.Type
+
+// The empty 404 of a contact-service without the delete account route.
+export class DeleteAccountRouteMissingError extends HttpApiSchema.EmptyError<DeleteAccountRouteMissingError>()(
+  {tag: 'DeleteAccountRouteMissingError', status: 404}
+) {}
 
 const ClientHashedPhoneNumber = HashedPhoneNumber.pipe(
   Schema.filter((hash) => !String.startsWith(SERVER_HASH_PREFIX)(hash), {

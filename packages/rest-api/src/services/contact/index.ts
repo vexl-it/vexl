@@ -19,6 +19,7 @@ import {
   type ConvertPhoneNumberHashesToServerHashesRequest,
   type CreateUserRequest,
   type DeactivateClubJoinLinkRequest,
+  type DeleteAccountRequest,
   type EraseUserFromNetworkRequest,
   type FetchCommonConnectionsPaginatedRequest,
   type FetchMyContactsPaginatedRequest,
@@ -127,6 +128,10 @@ export function api({
         ),
       deleteUser: () =>
         withSecurityHeaders((headers) => client.User.deleteUser({headers})),
+      deleteAccount: (body: DeleteAccountRequest) =>
+        withSecurityHeaders((headers) =>
+          client.User.deleteAccount({payload: body, headers})
+        ),
       importContacts: (body: ImportContactsRequest) =>
         withSecurityHeaders((headers) =>
           client.Contact.importContacts({payload: body, headers})

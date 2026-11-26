@@ -121,6 +121,7 @@
   "common.addContacts": "連絡先を追加",
   "common.or": "または",
   "common.edit": "編集",
+  "common.changePhoneNumber": "番号を変更",
   "common.enableNotifications": "通知をオンにする",
   "common.sendAMessage": "メッセージを送る",
   "common.noResults": "該当なし"

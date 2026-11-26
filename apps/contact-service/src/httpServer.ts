@@ -50,6 +50,7 @@ import {importContacts} from './routes/contacts/importContacts'
 import {ImportContactsQuotaService} from './routes/contacts/importContactsQuotaService'
 import {checkUserExists} from './routes/user/checkUserExists'
 import {createUser} from './routes/user/createUser'
+import {deleteAccount} from './routes/user/deleteAccount'
 import {deleteUser} from './routes/user/deleteUser'
 import {eraseUserFromNetwork} from './routes/user/eraseUserFromNetwork'
 import {refreshUser} from './routes/user/refreshUser'
@@ -68,6 +69,7 @@ const UserApiGroupLive = HttpApiBuilder.group(
       .handle('refreshUser', refreshUser)
       .handle('restoreUser', restoreUser)
       .handle('deleteUser', deleteUser)
+      .handle('deleteAccount', deleteAccount)
       .handle('eraseUserFromNetwork', eraseUserFromNetwork)
       .handle('updateNotificationToken', updateNotificationToken)
 )

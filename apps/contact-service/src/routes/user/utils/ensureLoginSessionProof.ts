@@ -25,7 +25,7 @@ const USED_PROOF_TTL_MS = 2 * MAX_PROOF_AGE_MS
 const usedProofKey = (publicKey: PublicKeyPemBase64, message: string): string =>
   `login-session-proof:${createHash('sha256').update(`${publicKey}:${message}`).digest('hex')}`
 
-interface ProofInput {
+export interface ProofInput {
   publicKey: PublicKeyPemBase64
   loginSessionId: LoginSessionId
   loginSessionProof: LoginSessionProof | undefined

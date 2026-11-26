@@ -1,5 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Context, Effect, Layer, type Option} from 'effect'
 import {type UserRecord} from './domain'
@@ -8,6 +10,13 @@ import {
   type ClearVexlNotificationTokenHeldByOtherUsersParams,
 } from './queries/createClearVexlNotificationTokenHeldByOtherUsers'
 import {createDeleteUserByPublicKeyAndHash} from './queries/createDeleteUserByPublicKeyAndHash'
+import {createDeleteUsersByPublicKey} from './queries/createDeleteUsersByPublicKey'
+import {
+  createFindAccountSessionsByPublicKey,
+  type AccountSessionRow,
+} from './queries/createFindAccountSessionsByPublicKey'
+import {createFindHashesByPublicKey} from './queries/createFindHashesByPublicKey'
+import {createFindLoginSessionIdsByPublicKey} from './queries/createFindLoginSessionIdsByPublicKey'
 import {createFindUserByHash} from './queries/createFindUserByHash'
 import {createFindUserbyPublicKeyAndHash} from './queries/createFindUserByPublicKeyAndHash'
 import {
@@ -15,6 +24,7 @@ import {
   type FindUsersToNotifyAboutInactivityParams,
   type UserToNotifyAboutInactivity,
 } from './queries/createFindUsersToNotifyAboutInactivity'
+import {createFindVexlNotificationTokenOfAccountByHash} from './queries/createFindVexlNotificationTokenOfAccountByHash'
 import {
   createFindVexlNotificationTokensForNewContentNotification,
   type NewContentNotificationResults,
@@ -33,6 +43,7 @@ import {
   createInsertUser,
   type CreateUserParams,
 } from './queries/createInsertUser'
+import {createLockAccountByPublicKey} from './queries/createLockAccountByPublicKey'
 import {
   createUpdateAppSourceForUser,
   type UpdateAppSourceForUserParams,
@@ -70,6 +81,29 @@ export interface UserDbOperations {
   findUserByHash: (
     hash: ServerHashedNumber
   ) => Effect.Effect<Option.Option<UserRecord>, UnexpectedServerError>
+
+  findHashesByPublicKey: (
+    publicKey: PublicKeyPemBase64
+  ) => Effect.Effect<readonly ServerHashedNumber[], UnexpectedServerError>
+
+  findLoginSessionIdsByPublicKey: (
+    publicKey: PublicKeyPemBase64
+  ) => Effect.Effect<readonly LoginSessionId[], UnexpectedServerError>
+
+  findAccountSessionsByPublicKey: (
+    publicKey: PublicKeyPemBase64
+  ) => Effect.Effect<readonly AccountSessionRow[], UnexpectedServerError>
+
+  lockAccountByPublicKey: (
+    publicKey: PublicKeyPemBase64
+  ) => Effect.Effect<void, UnexpectedServerError>
+
+  findVexlNotificationTokenOfAccountByHash: (
+    hash: ServerHashedNumber
+  ) => Effect.Effect<
+    Option.Option<VexlNotificationToken>,
+    UnexpectedServerError
+  >
 
   findUserByPublicKeyAndHash: (args: {
     hash: ServerHashedNumber
@@ -113,6 +147,10 @@ export interface UserDbOperations {
     hash: ServerHashedNumber
   }) => Effect.Effect<void, UnexpectedServerError>
 
+  deleteUsersByPublicKey: (
+    publicKey: PublicKeyPemBase64
+  ) => Effect.Effect<readonly ServerHashedNumber[], UnexpectedServerError>
+
   updateRefreshUser: (
     args: UpdateRefreshUserParams
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -146,12 +184,24 @@ export class UserDbService extends Context.Tag('UserDbService')<
       )
       const insertUser = yield* _(createInsertUser)
       const findUserByHash = yield* _(createFindUserByHash)
+      const findHashesByPublicKey = yield* _(createFindHashesByPublicKey)
+      const findLoginSessionIdsByPublicKey = yield* _(
+        createFindLoginSessionIdsByPublicKey
+      )
+      const findAccountSessionsByPublicKey = yield* _(
+        createFindAccountSessionsByPublicKey
+      )
+      const lockAccountByPublicKey = yield* _(createLockAccountByPublicKey)
+      const findVexlNotificationTokenOfAccountByHash = yield* _(
+        createFindVexlNotificationTokenOfAccountByHash
+      )
       const findUserByPublicKeyAndHash = yield* _(
         createFindUserbyPublicKeyAndHash
       )
       const deleteUserByPublicKeyAndHash = yield* _(
         createDeleteUserByPublicKeyAndHash
       )
+      const deleteUsersByPublicKey = yield* _(createDeleteUsersByPublicKey)
       const updateRefreshUser = yield* _(createUpdateRefreshUser)
       const updateLoginSessionId = yield* _(createUpdateLoginSessionId)
 
@@ -186,8 +236,14 @@ export class UserDbService extends Context.Tag('UserDbService')<
         clearVexlNotificationTokenHeldByOtherUsers,
         insertUser,
         findUserByHash,
+        findHashesByPublicKey,
+        findLoginSessionIdsByPublicKey,
+        findAccountSessionsByPublicKey,
+        lockAccountByPublicKey,
+        findVexlNotificationTokenOfAccountByHash,
         findUserByPublicKeyAndHash,
         deleteUserByPublicKeyAndHash,
+        deleteUsersByPublicKey,
         updateRefreshUser,
         updateLoginSessionId,
         findVexlNotificationTokensOfUsersWhoDirectlyImportedHash,

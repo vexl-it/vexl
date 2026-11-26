@@ -8,19 +8,23 @@ import {
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {Schema} from 'effect'
+import {Array, Schema} from 'effect'
 import {
   dummyChatWithMessages,
   type ChatMessageWithState,
 } from '../../chat/domain'
+import anonymizePhoneNumber from '../../chat/utils/anonymizePhoneNumber'
 import {createEmptyTradeChecklistInState} from '../domain'
 import {updateTradeChecklistState} from '../utils'
 import {
+  defaultPhoneNumberToReveal,
   exchangedDetails,
   exchangedDetailsForEvent,
   latestReveal,
+  myRevealedPhoneNumberForEvent,
   pendingRequestFromThem,
   revealEventForMessage,
+  revealFromSelection,
   selectionFromReveal,
   stillPendingDetails,
   type RevealUpdate,
@@ -265,5 +269,170 @@ it('maps legacy reveal messages onto the same shape', () => {
     nickname: true,
     photo: false,
     phoneNumber: false,
+  })
+})
+
+describe('phone number of a multi-number account', () => {
+  const main = Schema.decodeUnknownSync(E164PhoneNumber)('+420733733733')
+  const extra = Schema.decodeUnknownSync(E164PhoneNumber)('+421905123456')
+  const removed = Schema.decodeUnknownSync(E164PhoneNumber)('+48500600700')
+  const accountPhoneNumbers = Array.make(main, extra)
+
+  const identityWith = (
+    phoneNumber: E164PhoneNumber,
+    timestamp: number
+  ): IdentityRevealChatMessage => ({
+    status: 'REQUEST_REVEAL',
+    timestamp: at(timestamp),
+    deanonymizedUser: {
+      name,
+      partialPhoneNumber: anonymizePhoneNumber(phoneNumber),
+    },
+  })
+  const contactWith = (
+    phoneNumber: E164PhoneNumber,
+    timestamp: number
+  ): ContactRevealChatMessage => ({
+    status: 'REQUEST_REVEAL',
+    timestamp: at(timestamp),
+    fullPhoneNumber: phoneNumber,
+  })
+
+  it('reveals the same number in the nickname and in the contact', () => {
+    const reveal = revealFromSelection({
+      selection: {nickname: true, phoneNumber: true, photo: false},
+      requested: {nickname: false, phoneNumber: false, photo: false},
+      name,
+      photo: undefined,
+      phoneNumber: extra,
+      timestamp: at(1),
+    })
+
+    expect(reveal.contact?.fullPhoneNumber).toBe(extra)
+    expect(reveal.identity?.deanonymizedUser?.partialPhoneNumber).toBe(
+      anonymizePhoneNumber(extra)
+    )
+  })
+
+  it('defaults to the main number in a chat that got none yet', () => {
+    expect(
+      defaultPhoneNumberToReveal({
+        accountPhoneNumbers,
+        chat: chatWith([]),
+        draft: {},
+      })
+    ).toBe(main)
+  })
+
+  it('defaults to the number this chat already got', () => {
+    const chat = chatWith([
+      message('sent', {identity: identityWith(extra, 1)}, 1),
+    ])
+
+    expect(
+      defaultPhoneNumberToReveal({accountPhoneNumbers, chat, draft: {}})
+    ).toBe(extra)
+  })
+
+  it('prefers the number of the unsent draft', () => {
+    const chat = chatWith([message('sent', {contact: contactWith(main, 1)}, 1)])
+
+    expect(
+      defaultPhoneNumberToReveal({
+        accountPhoneNumbers,
+        chat,
+        draft: {contact: contactWith(extra, 2)},
+      })
+    ).toBe(extra)
+  })
+
+  it('prefers the nickname number of the draft over an earlier full number', () => {
+    const chat = chatWith([message('sent', {contact: contactWith(main, 1)}, 1)])
+
+    expect(
+      defaultPhoneNumberToReveal({
+        accountPhoneNumbers,
+        chat,
+        draft: {identity: identityWith(extra, 2)},
+      })
+    ).toBe(extra)
+  })
+
+  it('prefers the full number over a nickname mask shared by two numbers', () => {
+    const lookalike = Schema.decodeUnknownSync(E164PhoneNumber)('+420777222733')
+
+    expect(
+      defaultPhoneNumberToReveal({
+        accountPhoneNumbers: Array.make(main, lookalike),
+        chat: chatWith([]),
+        draft: {
+          identity: identityWith(lookalike, 1),
+          contact: contactWith(lookalike, 1),
+        },
+      })
+    ).toBe(lookalike)
+  })
+
+  it('defaults to the main number when the sent one left the account', () => {
+    const chat = chatWith([
+      message('sent', {contact: contactWith(removed, 1)}, 1),
+    ])
+
+    expect(
+      defaultPhoneNumberToReveal({accountPhoneNumbers, chat, draft: {}})
+    ).toBe(main)
+  })
+
+  it('shows the number that was sent, also after it left the account', () => {
+    const sent = message(
+      'sent',
+      {identity: identityWith(removed, 1), contact: contactWith(removed, 1)},
+      1
+    )
+    const answer = message(
+      'received',
+      {
+        identity: {...identityWith(main, 2), status: 'APPROVE_REVEAL'},
+        contact: {...contactWith(main, 2), status: 'APPROVE_REVEAL'},
+      },
+      2
+    )
+    const chat = chatWith([sent, answer])
+    const event = revealEventForMessage(chat, answer)
+    if (!event) throw new Error('No event')
+
+    expect(myRevealedPhoneNumberForEvent(chat, event)).toEqual({
+      full: removed,
+      partial: anonymizePhoneNumber(removed),
+    })
+  })
+
+  it('shows only what was sent up to the event', () => {
+    const first = message('sent', {identity: identityWith(extra, 1)}, 1)
+    const later = message('sent', {identity: identityWith(main, 3)}, 3)
+    const chat = chatWith([first, later])
+    const event = revealEventForMessage(chat, first)
+    if (!event) throw new Error('No event')
+
+    expect(myRevealedPhoneNumberForEvent(chat, event)).toEqual({
+      full: undefined,
+      partial: anonymizePhoneNumber(extra),
+    })
+  })
+
+  it('has no number for a chat that never got one', () => {
+    const answer = message(
+      'received',
+      {identity: identity('APPROVE_REVEAL', 1)},
+      1
+    )
+    const chat = chatWith([answer])
+    const event = revealEventForMessage(chat, answer)
+    if (!event) throw new Error('No event')
+
+    expect(myRevealedPhoneNumberForEvent(chat, event)).toEqual({
+      full: undefined,
+      partial: undefined,
+    })
   })
 })

@@ -38,7 +38,7 @@ import {
 } from './repostToConnectionsAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
-const noteConnectionUpdatesSemaphoreAtom = atom(() =>
+export const noteConnectionUpdatesSemaphoreAtom = atom(() =>
   Effect.unsafeMakeSemaphore(1)
 )
 

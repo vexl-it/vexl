@@ -72,7 +72,7 @@
   "loginFlow.restoreFromBackup.restored.chats.title": "メッセージが届くとチャットが戻ります",
   "loginFlow.restoreFromBackup.restored.chats.text": "相手からメッセージが届くと、これまでの履歴ごとチャットが戻ります。",
   "loginFlow.restoreFromBackup.restored.contacts.title": "連絡先をインポート",
-  "loginFlow.restoreFromBackup.restored.contacts.text": "友達の名前がまた表示されるようになります。",
+  "loginFlow.restoreFromBackup.restored.contacts.text": "インポートすると、リーチが戻ります。",
   "loginFlow.restoreFromBackup.failed.title": "アカウントを復元できませんでした",
   "loginFlow.restoreFromBackup.failed.unknown": "問題が発生しました。少し待ってから、もう一度試してね。",
   "loginFlow.restoreFromBackup.failed.noLongerValid.title": "このバックアップはもう使えません",

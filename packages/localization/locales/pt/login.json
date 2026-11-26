@@ -72,7 +72,7 @@
   "loginFlow.restoreFromBackup.restored.chats.title": "As conversas voltam quando te escrevem",
   "loginFlow.restoreFromBackup.restored.chats.text": "Quando a outra pessoa te escrever, a conversa volta com o histórico.",
   "loginFlow.restoreFromBackup.restored.contacts.title": "Importa os teus contactos",
-  "loginFlow.restoreFromBackup.restored.contacts.text": "Assim voltas a ver os nomes dos teus amigos.",
+  "loginFlow.restoreFromBackup.restored.contacts.text": "Importa-os para recuperares o teu alcance.",
   "loginFlow.restoreFromBackup.failed.title": "Não foi possível restaurar a tua conta",
   "loginFlow.restoreFromBackup.failed.unknown": "Algo correu mal. Tenta novamente daqui a pouco.",
   "loginFlow.restoreFromBackup.failed.noLongerValid.title": "Este backup já não funciona",

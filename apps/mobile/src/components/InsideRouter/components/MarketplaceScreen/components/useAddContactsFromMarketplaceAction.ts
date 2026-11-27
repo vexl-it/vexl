@@ -34,7 +34,7 @@ export default function useAddContactsFromMarketplaceAction(): () => void {
           Effect.catchAll(() => Effect.succeed(false))
         )
       ).finally(() => {
-        navigation.navigate('ContactPreferences', {filter: 'new'})
+        navigation.navigate('ContactPreferences')
       })
     })
   }, [

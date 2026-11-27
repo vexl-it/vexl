@@ -1,10 +1,7 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {ScopeProvider} from 'bunshi/dist/react'
 import React, {useCallback, useMemo, useState} from 'react'
-import {
-  type ContactPreferencesStackParamsList,
-  type RootStackScreenProps,
-} from '../../navigationTypes'
+import {type ContactPreferencesStackParamsList} from '../../navigationTypes'
 import AddNewContactScreen from '../AddNewContactScreen'
 import AddNewContactCountryPickerScreen from '../AddNewContactScreen/AddNewContactCountryPickerScreen'
 import ContactPreferencesListScreen from './ContactPreferencesListScreen'
@@ -12,11 +9,7 @@ import {ContactsSelectScope} from './components/ContactListSelect/atom'
 
 const Stack = createNativeStackNavigator<ContactPreferencesStackParamsList>()
 
-type Props = RootStackScreenProps<'ContactPreferences'>
-
-export default function ContactPreferencesFlow({
-  route,
-}: Props): React.ReactElement {
+export default function ContactPreferencesFlow(): React.ReactElement {
   const [, setReloadContacts] = useState(0)
   const reloadContacts = useCallback(() => {
     setReloadContacts((value) => value + 1)
@@ -38,7 +31,6 @@ export default function ContactPreferencesFlow({
         <Stack.Screen
           name="ContactPreferencesList"
           component={ContactPreferencesListScreen}
-          initialParams={route.params}
         />
         <Stack.Screen name="AddNewContact" component={AddNewContactScreen} />
         <Stack.Screen

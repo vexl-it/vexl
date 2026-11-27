@@ -29,10 +29,8 @@ import useSubmitSelectedContacts from './hooks/useSubmitSelectedContacts'
 
 function ContactsListSelect({
   addContactRequestId,
-  filter,
 }: {
   readonly addContactRequestId: number
-  readonly filter?: ContactsFilter
 }): React.ReactElement {
   const {t} = useTranslation()
   const {
@@ -78,7 +76,7 @@ function ContactsListSelect({
     cancelBulkSelectionRef.current?.()
     cancelBulkSelectionRef.current = toggleAllContactsToDisplay()
   }, [toggleAllContactsToDisplay])
-  const {selectedFilter, setSelectedFilter} = usePreparedContactsFilter(filter)
+  const {selectedFilter, setSelectedFilter} = usePreparedContactsFilter()
   const {isSubmittingContacts, submitSelectedContacts} =
     useSubmitSelectedContacts()
   const submitBarHeightRef = React.useRef(0)
@@ -266,15 +264,8 @@ function ContactsListSelect({
 
 export default function ContactListWithLoadStep({
   addContactRequestId,
-  filter,
 }: {
   readonly addContactRequestId: number
-  readonly filter?: ContactsFilter
 }): React.ReactElement {
-  return (
-    <ContactsListSelect
-      addContactRequestId={addContactRequestId}
-      filter={filter}
-    />
-  )
+  return <ContactsListSelect addContactRequestId={addContactRequestId} />
 }

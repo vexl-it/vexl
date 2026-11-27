@@ -135,7 +135,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       get(requestedSearchTextAtom) !== get(readyContactsQueryAtom).searchText
     )
   })
-  const resetContactsFilterFromRouteActionAtom = atom(
+  const selectContactsFilterActionAtom = atom(
     null,
     (get, set, contactsFilter: ContactsFilter) => {
       const readyContactsQuery = get(readyContactsQueryAtom)
@@ -961,7 +961,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     readyContactsQueryAtom,
     isContactsPreparingAtom,
     isContactsSearchPreparingAtom,
-    resetContactsFilterFromRouteActionAtom,
+    selectContactsFilterActionAtom,
     selectContactAtom,
     addNewContactSelectedCountryCodeAtom,
     addNewContactActionAtom,

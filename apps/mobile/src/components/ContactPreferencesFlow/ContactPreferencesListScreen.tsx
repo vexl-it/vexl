@@ -10,7 +10,6 @@ import {useAtomValue} from 'jotai'
 import React, {memo, useCallback, useEffect, useState} from 'react'
 import {type ContactPreferencesStackScreenProps} from '../../navigationTypes'
 import {loadingContactsFromDeviceAtom} from '../../state/contacts/atom/loadContactsFromDeviceActionAtom'
-import {type ContactsFilter} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {runAfterAnimationFrame} from '../../utils/runAfterAnimationFrames'
 import useSafeGoBack from '../../utils/useSafeGoBack'
@@ -53,23 +52,18 @@ function ContactPreferencesNavigationBar({
 }
 
 function ContactPreferencesContent({
-  filter,
   onReady,
 }: {
-  readonly filter?: ContactsFilter
   readonly onReady: () => void
 }): React.ReactElement {
   useEffect(() => {
     return runAfterAnimationFrame(onReady)
   }, [onReady])
 
-  return <ContactsListSelect addContactRequestId={0} filter={filter} />
+  return <ContactsListSelect addContactRequestId={0} />
 }
 
-function ContactPreferencesListScreen({
-  navigation,
-  route: {params},
-}: Props): React.ReactElement {
+function ContactPreferencesListScreen({navigation}: Props): React.ReactElement {
   const loadingContactsFromDevice = useAtomValue(loadingContactsFromDeviceAtom)
   const [shouldRenderContactsContent, setShouldRenderContactsContent] =
     useState(false)
@@ -99,10 +93,7 @@ function ContactPreferencesListScreen({
     >
       <Stack f={1} testID="@contactPreferences" bg="$backgroundPrimary">
         {shouldRenderContactsContent ? (
-          <ContactPreferencesContent
-            filter={params?.filter}
-            onReady={handleContactsContentReady}
-          />
+          <ContactPreferencesContent onReady={handleContactsContentReady} />
         ) : null}
         <PreparingContactsOverlay visible={isContactPreferencesLoading} />
       </Stack>

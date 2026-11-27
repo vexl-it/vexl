@@ -21,7 +21,7 @@ function ImportNewContactsMarketplaceSuggestion(): React.ReactElement {
         label: t('marketplace.importNewContactsSuggestion.button'),
         onPress: () => {
           dismissImportNewContactsSuggestion()
-          navigation.navigate('ContactPreferences', {filter: 'new'})
+          navigation.navigate('ContactPreferences')
         },
       }}
       secondaryButton={{

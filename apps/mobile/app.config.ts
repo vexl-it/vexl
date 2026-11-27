@@ -326,6 +326,7 @@ export default {
     './expo-plugins/android-eas-signing-plugin.js',
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     './expo-plugins/android-manifest-optional-portrait-plugin.js',
+    './expo-plugins/android-text-advance-width-plugin.js',
     'expo-font',
     'expo-sharing',
     'expo-status-bar',

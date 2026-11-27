@@ -2,6 +2,7 @@ import type React from 'react'
 
 import {AnimatedNavigationBarScreen} from './AnimatedNavigationBarScreen'
 import {AvatarScreen} from './AvatarScreen'
+import {BannerCarouselScreen} from './BannerCarouselScreen'
 import {BannerScreen} from './BannerScreen'
 import {BlogCardScreen} from './BlogCardScreen'
 import {ButtonScreen} from './ButtonScreen'
@@ -51,9 +52,11 @@ import {OffersReencryptionStatusScreen} from './OffersReencryptionStatusScreen'
 import {PickerScreen} from './PickerScreen'
 import {PopoverMenuScreen} from './PopoverMenuScreen'
 import {PriceRangeInputScreen} from './PriceRangeInputScreen'
+import {ProgressBarScreen} from './ProgressBarScreen'
 import {RadioGroupScreen} from './RadioGroupScreen'
 import {RadiusSliderScreen} from './RadiusSliderScreen'
 import {RangeSliderScreen} from './RangeSliderScreen'
+import {ReachLabelScreen} from './ReachLabelScreen'
 import {ReachStatsScreen} from './ReachStatsScreen'
 import {RowButtonScreen} from './RowButtonScreen'
 import {RowCheckboxScreen} from './RowCheckboxScreen'
@@ -75,6 +78,7 @@ import {ToastScreen} from './ToastScreen'
 import {TrustBadgeScreen} from './TrustBadgeScreen'
 import {TrustedFriendExplanationScreen} from './TrustedFriendExplanationScreen'
 import {TypographyScreen} from './TypographyScreen'
+import {UsageMeterScreen} from './UsageMeterScreen'
 
 export interface ScreenEntry {
   readonly label: string
@@ -85,6 +89,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Animated Navigation Bar', component: AnimatedNavigationBarScreen},
   {label: 'Avatar', component: AvatarScreen},
   {label: 'Banner', component: BannerScreen},
+  {label: 'Banner Carousel', component: BannerCarouselScreen},
   {label: 'Blog Card', component: BlogCardScreen},
   {label: 'Buy/Sell Range Slider', component: BuySellRangeSliderScreen},
   {label: 'Button', component: ButtonScreen},
@@ -142,9 +147,11 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Picker', component: PickerScreen},
   {label: 'Popover Menu', component: PopoverMenuScreen},
   {label: 'Price Range Input', component: PriceRangeInputScreen},
+  {label: 'Progress Bar', component: ProgressBarScreen},
   {label: 'Radio Group', component: RadioGroupScreen},
   {label: 'Range Slider', component: RangeSliderScreen},
   {label: 'Radius Slider', component: RadiusSliderScreen},
+  {label: 'Reach Label', component: ReachLabelScreen},
   {label: 'Reach Stats', component: ReachStatsScreen},
   {label: 'Row Button', component: RowButtonScreen},
   {label: 'Row Checkbox', component: RowCheckboxScreen},
@@ -169,4 +176,5 @@ export const screens: readonly ScreenEntry[] = [
     component: TrustedFriendExplanationScreen,
   },
   {label: 'Typography', component: TypographyScreen},
+  {label: 'Usage Meter', component: UsageMeterScreen},
 ]

@@ -1,4 +1,12 @@
-import {Banner, Image, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {
+  Banner,
+  Image,
+  ReachNetworkGraphic,
+  SizableText,
+  StatBanner,
+  Theme,
+  YStack,
+} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
@@ -88,6 +96,31 @@ function ThemeGroup({
           title="Give love"
           description="Like Vexl? Help us improve it. Donate some sound money."
           primaryButton={{label: 'Donate'}}
+        />
+
+        <SectionLabel>Neutral with leading graphic</SectionLabel>
+        <Banner
+          color="neutral"
+          leading={<ReachNetworkGraphic />}
+          title="Reach beyond your contacts"
+          description="Add a contact so you can also reach the people they know."
+        />
+
+        <SectionLabel>Stat green</SectionLabel>
+        <StatBanner
+          color="green"
+          label="Active in Czechia"
+          value="1,240 offers"
+          description="Your network brings you 31 of them. Add more contacts to grow it and see more offers."
+        />
+
+        <SectionLabel>Stat yellow, pressable</SectionLabel>
+        <StatBanner
+          color="yellow"
+          label="Your reach"
+          value="125 people"
+          description="can see your offers. Add more contacts for a better chance of a trade."
+          onPress={() => {}}
         />
       </YStack>
     </Theme>

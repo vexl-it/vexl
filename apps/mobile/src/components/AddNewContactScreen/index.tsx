@@ -25,14 +25,10 @@ export default function AddNewContactScreen({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
-  const {
-    importVexlOnlyContactsActionAtom,
-    resetContactsFilterFromRouteActionAtom,
-  } = useMolecule(contactSelectMolecule)
+  const {importVexlOnlyContactsActionAtom, selectContactsFilterActionAtom} =
+    useMolecule(contactSelectMolecule)
   const importVexlOnlyContacts = useSetAtom(importVexlOnlyContactsActionAtom)
-  const resetContactsFilterFromRoute = useSetAtom(
-    resetContactsFilterFromRouteActionAtom
-  )
+  const selectContactsFilter = useSetAtom(selectContactsFilterActionAtom)
   const editContactNumber = params?.editContactNumber
   const contactToEditFromStore = useAtomValue(
     contactByNormalizedNumberAtom(editContactNumber)
@@ -62,13 +58,13 @@ export default function AddNewContactScreen({
             if (!importSuccessful) return
             // land on the "New" tab with this screen popped off the stack so
             // the back button won't return to the import screen
-            resetContactsFilterFromRoute('new')
+            selectContactsFilter('new')
             navigation.popToTop()
           })
         )
       )
     )
-  }, [importVexlOnlyContacts, navigation, resetContactsFilterFromRoute])
+  }, [importVexlOnlyContacts, navigation, selectContactsFilter])
 
   return (
     <Screen

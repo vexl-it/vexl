@@ -3,6 +3,7 @@ import {Context, Effect, Layer, type Option} from 'effect'
 
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {type OfferStatsResponse} from '@vexl-next/rest-api/src/services/offer/offerStats'
 import {
   type OfferParts,
   type OfferPartsWithOfferForUserUpdateCounter,
@@ -35,6 +36,7 @@ import {
   createInsertPublicPart,
   type InsertPublicPartRequest,
 } from './queries/createInsertPublicPart'
+import {createQueryActiveOffersPerCountry} from './queries/createQueryActiveOffersPerCountry'
 import {createQueryAllPrivateRecordsByPublicRecordId} from './queries/createQueryAllPrivateRecordsByPublicRecordId'
 import {createQueryNumberOfReportsForUser} from './queries/createQueryNumberOfReportsForUser'
 import {
@@ -81,6 +83,11 @@ export interface OfferDbOperations {
   queryOffersIds: (
     args: QueryOfferIdsForUserRequest
   ) => Effect.Effect<readonly OfferId[], UnexpectedServerError>
+
+  queryActiveOffersPerCountry: () => Effect.Effect<
+    OfferStatsResponse,
+    UnexpectedServerError
+  >
 
   queryNumberOfReportsForUser: (
     args: PublicKeyPemBase64
@@ -150,6 +157,9 @@ export class OfferDbService extends Context.Tag('OfferDbService')<
           createQueryOfferByPublicKeyAndOfferId
         ),
         queryOffersIds: yield* _(createQueryOfferIdsForUser),
+        queryActiveOffersPerCountry: yield* _(
+          createQueryActiveOffersPerCountry
+        ),
         queryNumberOfReportsForUser: yield* _(
           createQueryNumberOfReportsForUser
         ),

@@ -1,3 +1,4 @@
+import {HttpApiClient} from '@effect/platform'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -89,6 +90,10 @@ export function api({
       })
     )
 
+    const publicClient = yield* _(
+      HttpApiClient.make(OfferApiSpecification, {baseUrl: url})
+    )
+
     const commonHeaders = makeCommonHeaders({
       appSource,
       versionCode: clientVersion,
@@ -115,6 +120,7 @@ export function api({
     )
 
     return {
+      getOfferStats: () => publicClient.getOfferStats(),
       getOffersForMeModifiedOrCreatedAfterPaginated: (
         req: GetOffersForMeCreatedOrModifiedAfterPaginatedRequest
       ) =>

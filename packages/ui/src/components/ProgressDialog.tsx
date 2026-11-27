@@ -1,16 +1,9 @@
-import React, {useEffect, useRef, useState} from 'react'
-import Animated, {
-  cancelAnimation,
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated'
-import {styled, useTheme} from 'tamagui'
-import {Stack, XStack, YStack} from '../primitives'
+import React from 'react'
+import {useTheme} from 'tamagui'
+import {XStack, YStack} from '../primitives'
 import {Dialog} from './Dialog'
 import {Loader} from './Loader'
+import {IndeterminateProgressBar, ProgressBar} from './ProgressBar'
 import {Typography} from './Typography'
 
 export type ProgressIndication =
@@ -32,28 +25,6 @@ export interface ProgressDialogProps {
   readonly visible: boolean
 }
 
-const ProgressFill = styled(Stack, {
-  name: 'ProgressFill',
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  bottom: 0,
-  backgroundColor: '$foregroundPrimary',
-  borderRadius: '$11',
-})
-
-const AnimatedProgressFill = Animated.createAnimatedComponent(ProgressFill)
-
-const ProgressTrack = styled(XStack, {
-  name: 'ProgressTrack',
-  position: 'relative',
-  width: '100%',
-  height: 4,
-  borderRadius: '$11',
-  backgroundColor: '$backgroundTertiary',
-  overflow: 'hidden',
-})
-
 function percentageFromIndicateProgress(
   indicateProgress: VisibleProgressIndication
 ): number {
@@ -61,45 +32,6 @@ function percentageFromIndicateProgress(
   if (indicateProgress.type === 'loader') return 0
   if (indicateProgress.type === 'done') return 100
   return indicateProgress.percentage
-}
-
-function IndeterminateProgressBar(): React.JSX.Element {
-  const [trackWidth, setTrackWidth] = useState(0)
-  const position = useSharedValue(0)
-
-  useEffect(() => {
-    position.value = withRepeat(
-      withTiming(1, {duration: 1200, easing: Easing.linear}),
-      -1
-    )
-
-    return () => {
-      cancelAnimation(position)
-    }
-  }, [position])
-
-  const animatedStyle = useAnimatedStyle(() => {
-    const fillWidth = trackWidth * 0.35
-
-    return {
-      width: fillWidth,
-      transform: [
-        {
-          translateX: position.value * (trackWidth + fillWidth) - fillWidth,
-        },
-      ],
-    }
-  })
-
-  return (
-    <ProgressTrack
-      onLayout={(e) => {
-        setTrackWidth(e.nativeEvent.layout.width)
-      }}
-    >
-      <AnimatedProgressFill style={animatedStyle} />
-    </ProgressTrack>
-  )
 }
 
 function ProgressLabels({
@@ -141,24 +73,6 @@ function ProgressIndicator({
   readonly indicateProgress: VisibleProgressIndication
 }): React.JSX.Element {
   const theme = useTheme()
-  const [trackWidth, setTrackWidth] = useState(0)
-  const percentage = percentageFromIndicateProgress(indicateProgress)
-  const progress = useSharedValue(percentage)
-  const previousPercentage = useRef(percentage)
-
-  useEffect(() => {
-    if (percentage < previousPercentage.current) {
-      progress.value = percentage
-    } else {
-      progress.value = withTiming(percentage)
-    }
-    previousPercentage.current = percentage
-  }, [percentage, progress])
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    width: (progress.value * trackWidth) / 100,
-  }))
-
   if (indicateProgress.type === 'loader') {
     return (
       <YStack alignItems="center" justifyContent="center" height="$5">
@@ -181,13 +95,10 @@ function ProgressIndicator({
 
   return (
     <YStack gap="$3">
-      <ProgressTrack
-        onLayout={(e) => {
-          setTrackWidth(e.nativeEvent.layout.width)
-        }}
-      >
-        <AnimatedProgressFill style={animatedStyle} />
-      </ProgressTrack>
+      <ProgressBar
+        value={percentageFromIndicateProgress(indicateProgress) / 100}
+        resetOnDecrease
+      />
       <ProgressLabels
         belowProgressLeft={belowProgressLeft}
         belowProgressRight={belowProgressRight}

@@ -19,6 +19,7 @@ import reportError from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {getClubReach} from '../../clubs/utils'
+import {importedContactsAtom} from '../../contacts/atom/contactsStore'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {ConnectionsState} from '../domain'
 import {persistedReachRequiresConnectionsAtom} from './reachNumberWithoutClubsConnectionsMmkvAtom'
@@ -80,6 +81,12 @@ export const fetchConnectionsActionAtom = atom(
 
       console.log('🦋 Refreshing connections state')
       const updateStarted = unixMillisecondsNow()
+      const syncedContactHashes = new Set(
+        Array.map(
+          get(importedContactsAtom),
+          (contact) => contact.computedValues.hash
+        )
+      )
 
       const {firstLevel, secondLevel} = yield* _(
         Effect.all(
@@ -152,13 +159,15 @@ export const fetchConnectionsActionAtom = atom(
         body: `Finished syncing connections in ${unixMillisecondsNow() - updateStarted} ms`,
       })
 
-      return {
+      const connections: ConnectionsState = {
         firstLevel,
         secondLevel,
         commonFriends,
         verifiedFriends,
         lastUpdate,
+        syncedContactHashes,
       }
+      return connections
     }).pipe(
       Effect.tapError((e) =>
         Effect.sync(() => {

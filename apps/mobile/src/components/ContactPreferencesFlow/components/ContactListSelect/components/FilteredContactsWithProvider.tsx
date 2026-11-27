@@ -24,12 +24,18 @@ interface ContactsListSceneProps {
   readonly contactsAtom: Atom<
     ReadonlyArray<Atom<StoredContactWithComputedValues>>
   >
+  readonly filter: ContactsFilter
+  readonly searchEmpty: boolean
+  readonly onReviewUnused: () => void
   readonly emptyVariant: 'noContactsInSelectedFilter' | 'noMatchingContacts'
   readonly keyboardBottomSpacerHeight: number
 }
 
 const ContactsListScene = React.memo(function ContactsListScene({
   contactsAtom,
+  filter,
+  searchEmpty,
+  onReviewUnused,
   emptyVariant,
   keyboardBottomSpacerHeight,
 }: ContactsListSceneProps): React.ReactElement {
@@ -39,6 +45,9 @@ const ContactsListScene = React.memo(function ContactsListScene({
     <Stack f={1} px="$5">
       <ContactsList
         contacts={contacts}
+        showUsageMeter={filter === 'all' && searchEmpty}
+        showUnusedExplainer={filter === 'nonSubmitted'}
+        onReviewUnused={onReviewUnused}
         emptyVariant={emptyVariant}
         keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
       />
@@ -138,6 +147,10 @@ function FilteredContacts({
     [handleScrollSettled]
   )
 
+  const onReviewUnused = useCallback(() => {
+    onFilterChange('nonSubmitted')
+  }, [onFilterChange])
+
   const contactsAtomByFilter = {
     all: allContactsToDisplayAtomsAtom,
     new: newContactsToDisplayAtomsAtom,
@@ -179,6 +192,9 @@ function FilteredContacts({
               {isActive || shouldMountInactiveScenes ? (
                 <ContactsListScene
                   contactsAtom={contactsAtomByFilter[filter]}
+                  filter={filter}
+                  searchEmpty={searchText.length === 0}
+                  onReviewUnused={onReviewUnused}
                   emptyVariant={emptyVariant}
                   keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
                 />

@@ -22,7 +22,6 @@ import {
   storedContactsAtom,
 } from '../../../../state/contacts/atom/contactsStore'
 import loadAndNormalizeContactsFromDeviceActionAtom from '../../../../state/contacts/atom/loadAndNormalizeContactsFromDeviceActionAtom'
-import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
   StoredContactWithComputedValues,
   type ContactsFilter,
@@ -45,7 +44,12 @@ import {parseVcardString} from '../../../../utils/vCard'
 import {showErrorAlert} from '../../../ErrorAlert'
 import {askAreYouSureActionAtom, globalDialogAtom} from '../../../GlobalDialog'
 import {toastNotificationAtom} from '../../../ToastNotification/atom'
+import {updatePendingOffOrder} from './contactReach'
+import {createContactReachAtoms} from './contactReachAtoms'
+import {createOfferStatsAtoms} from './createOfferStatsAtoms'
+import {createSubmitSelectedContactsAtom} from './createSubmitSelectedContactsAtom'
 import {createUpdateContactActionAtom} from './createUpdateContactActionAtom'
+import {type ReachBannerPage} from './reachBannerPages'
 
 export const ContactsSelectScope = createScope<{
   reloadContacts: () => void
@@ -135,7 +139,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       get(requestedSearchTextAtom) !== get(readyContactsQueryAtom).searchText
     )
   })
-  const resetContactsFilterFromRouteActionAtom = atom(
+  const selectContactsFilterActionAtom = atom(
     null,
     (get, set, contactsFilter: ContactsFilter) => {
       const readyContactsQuery = get(readyContactsQueryAtom)
@@ -303,13 +307,38 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const selectedNumbersStateAtom = atom<Set<E164PhoneNumber> | undefined>(
     undefined
   )
+  const pendingOffOrderAtom = atom<readonly E164PhoneNumber[]>([])
+  const chosenReachBannerPageAtom = atom<ReachBannerPage | undefined>(undefined)
   const selectedNumbersAtom = atom(
     (get) => get(selectedNumbersStateAtom) ?? get(defaultSelectedNumbersAtom),
-    (get, set, value: SetStateAction<Set<E164PhoneNumber>>): void => {
+    (
+      get,
+      set,
+      value: SetStateAction<Set<E164PhoneNumber>>,
+      contactsInOrder?: readonly E164PhoneNumber[]
+    ): void => {
+      const previous = get(selectedNumbersAtom)
+      const next = getValueFromSetStateActionOfAtom(value)(() => previous)
       set(
-        selectedNumbersStateAtom,
-        getValueFromSetStateActionOfAtom(value)(() => get(selectedNumbersAtom))
+        pendingOffOrderAtom,
+        updatePendingOffOrder(
+          get(pendingOffOrderAtom),
+          previous,
+          next,
+          contactsInOrder ??
+            Array.map(
+              get(_contactsToDisplayAtom),
+              (contact) => contact.computedValues.normalizedNumber
+            )
+        )
       )
+      set(selectedNumbersStateAtom, next)
+      if (
+        Array.every(get(normalizedContactsAtom), (contact) =>
+          next.has(contact.computedValues.normalizedNumber)
+        )
+      )
+        set(chosenReachBannerPageAtom, undefined)
     }
   )
   // Large contact sets are processed in chunks behind the stepped progress
@@ -394,19 +423,26 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     set(isBulkSelectionPreparingAtom, true)
 
     let cancelScheduledWork = runAfterTwoAnimationFrames(() => {
-      set(selectedNumbersAtom, (value) => {
-        const newValue = new Set<E164PhoneNumber>(value)
-        pipe(
-          contactsToDisplay,
-          Array.forEach((contact) => {
-            const number = contact.computedValues.normalizedNumber
-            if (shouldSelectAll) newValue.add(number)
-            else newValue.delete(number)
-          })
-        )
+      set(
+        selectedNumbersAtom,
+        (value) => {
+          const newValue = new Set<E164PhoneNumber>(value)
+          pipe(
+            contactsToDisplay,
+            Array.forEach((contact) => {
+              const number = contact.computedValues.normalizedNumber
+              if (shouldSelectAll) newValue.add(number)
+              else newValue.delete(number)
+            })
+          )
 
-        return newValue
-      })
+          return newValue
+        },
+        Array.map(
+          contactsToDisplay,
+          (contact) => contact.computedValues.normalizedNumber
+        )
+      )
 
       cancelScheduledWork = runAfterTwoAnimationFrames(() => {
         set(isBulkSelectionPreparingAtom, false)
@@ -469,33 +505,14 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     }
   )
 
-  const submitAllSelectedContactsActionAtom = atom(
-    null,
-    (get, set): Effect.Effect<boolean> => {
-      const {t} = get(translationAtom)
-      const selectedNumbers = Array.fromIterable(get(selectedNumbersAtom))
-      const showContactImportProgressDialog = get(
-        shouldShowContactImportProgressDialogAtom
-      )
-
-      return Effect.gen(function* (_) {
-        const result = yield* _(
-          set(submitContactsActionAtom, {
-            numbersToImport: selectedNumbers,
-            normalizeAndImportAll: false,
-            showOfferReencryptionDialog: selectedNumbers.length > 0,
-            manageLoadingOverlay: false,
-            showContactImportProgressDialog,
-          })
-        )
-
-        if (result === 'success') {
-          set(toastNotificationAtom, t('contacts.contactsSubmitted'))
-        }
-        return result === 'success'
-      })
-    }
-  )
+  const contactReachAtoms = createContactReachAtoms({
+    selectedNumbersAtom,
+    pendingOffOrderAtom,
+  })
+  const submitAllSelectedContactsActionAtom = createSubmitSelectedContactsAtom({
+    selectedNumbersAtom,
+    shouldShowContactImportProgressDialogAtom,
+  })
 
   const importContactsFromPhoneActionAtom = atom(
     null,
@@ -952,6 +969,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   })
 
   return {
+    ...createOfferStatsAtoms(),
+    ...contactReachAtoms,
+    chosenReachBannerPageAtom,
     areAllContactsToDisplaySelectedAtom,
     isBulkSelectionPreparingAtom,
     toggleAllContactsToDisplayActionAtom,
@@ -961,7 +981,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     readyContactsQueryAtom,
     isContactsPreparingAtom,
     isContactsSearchPreparingAtom,
-    resetContactsFilterFromRouteActionAtom,
+    selectContactsFilterActionAtom,
     selectContactAtom,
     addNewContactSelectedCountryCodeAtom,
     addNewContactActionAtom,

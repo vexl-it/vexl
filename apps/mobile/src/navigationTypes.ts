@@ -38,7 +38,6 @@ import {type EditableOfferField} from './components/CRUDOfferFlow/offerSetupStep
 import {type FaqType} from './components/FaqScreen/useContent'
 import {type TabType} from './components/TosScreen/useContent'
 import {type ChatIds} from './state/chat/domain'
-import {type ContactsFilter} from './state/contacts/domain'
 import {type OtherSideRole} from './utils/offerTypeSemantics'
 import {type RandomSeed} from './utils/RandomSeed'
 
@@ -171,7 +170,7 @@ export type RootStackParamsList = {
 
   DonationsFlow: NavigatorScreenParams<DonationsFlowParamsList>
 
-  ContactPreferences: {filter?: ContactsFilter | undefined} | undefined
+  ContactPreferences: undefined
 
   VexlOnlyContacts: undefined
 
@@ -262,7 +261,7 @@ export type RootStackScreenProps<T extends keyof RootStackParamsList> =
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ContactPreferencesStackParamsList = {
-  ContactPreferencesList: {filter?: ContactsFilter | undefined} | undefined
+  ContactPreferencesList: undefined
   AddNewContact:
     | {
         readonly editContactNumber?: E164PhoneNumber | undefined
@@ -354,20 +353,6 @@ export type InsideTabParamsList = {
   Messages: undefined
   Community: NavigatorScreenParams<CommunityParamsList> | undefined
 }
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ContactsTabParamsList = {
-  Submitted: {filter: ContactsFilter}
-  NonSubmitted: {filter: ContactsFilter}
-  New: {filter: ContactsFilter}
-  All: {filter: ContactsFilter}
-}
-
-export type ContactsTabScreenProps<T extends keyof ContactsTabParamsList> =
-  CompositeScreenProps<
-    MaterialTopTabScreenProps<ContactsTabParamsList, T>,
-    RootStackScreenProps<keyof RootStackParamsList>
-  >
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeCalculatorStackParamsList = {

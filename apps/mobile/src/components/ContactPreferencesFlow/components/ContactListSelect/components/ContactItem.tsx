@@ -2,21 +2,27 @@ import {useNavigation} from '@react-navigation/native'
 import {
   IconButton,
   PencilWriteEdit,
+  ReachLabel,
   Stack,
   Typography,
-  UserImagePlaceholder,
   XStack,
   useTheme,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue, type Atom} from 'jotai'
+import {Effect} from 'effect'
+import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React from 'react'
-import {getTokens} from 'tamagui'
+import {Pressable} from 'react-native'
 import {type ContactPreferencesStackScreenProps} from '../../../../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {getInternationalPhoneNumber} from '../../../../../utils/getInternationalPhoneNumber'
-import ContactPictureImage from '../../../../ContactPictureImage'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {formatInteger} from '../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
+import {globalDialogAtom} from '../../../../GlobalDialog'
 import {contactSelectMolecule} from '../atom'
+import ContactAvatar from './ContactAvatar'
+import ContactReachDetails from './ContactReachDetails'
 import IsSelectedSwitch from './IsSelectedSwitch'
 
 interface Props {
@@ -29,15 +35,72 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
     useNavigation<
       ContactPreferencesStackScreenProps<'ContactPreferencesList'>['navigation']
     >()
-  const {selectContactAtom} = useMolecule(contactSelectMolecule)
+  const {selectContactAtom, contactReachAtom} = useMolecule(
+    contactSelectMolecule
+  )
   const theme = useTheme()
-  const tokens = getTokens()
-  const avatarSize = tokens.size.$9.val
+  const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
+  const showDialog = useSetAtom(globalDialogAtom)
   const {
-    info: {nonUniqueContactId, name},
+    info: {name},
     computedValues: {normalizedNumber},
   } = contact
-  const isSelected = useAtomValue(selectContactAtom(normalizedNumber))
+  const selectedAtom = selectContactAtom(normalizedNumber)
+  const isSelected = useAtomValue(selectedAtom)
+  const setSelected = useSetAtom(selectedAtom)
+  const reach = useAtomValue(contactReachAtom(normalizedNumber))
+  const count =
+    reach.type === 'active'
+      ? reach.people
+      : reach.type === 'pendingOff'
+        ? reach.loss
+        : 0
+  const isLoss = reach.type === 'pendingOff'
+  const localizedString = formatInteger(count, locale)
+  const reachLabel = t(
+    isLoss
+      ? 'contactPreferences.contactReach.loss'
+      : 'contactPreferences.contactReach.people',
+    {count, localizedString}
+  )
+  const internationalNumber = getInternationalPhoneNumber(normalizedNumber)
+  const accessibilityLabel = [
+    name,
+    internationalNumber,
+    ...(count > 0
+      ? [
+          isLoss
+            ? t('contactPreferences.contactReach.sheet.pendingOff', {
+                name,
+                count,
+                localizedString,
+              })
+            : t('contactPreferences.contactReach.a11yLabel', {
+                count,
+                localizedString,
+              }),
+        ]
+      : []),
+  ].join(', ')
+  const showDetails = (): void => {
+    Effect.runFork(
+      showDialog({
+        children: <ContactReachDetails contact={contact} reach={reach} />,
+        positiveButtonText: t(
+          reach.type === 'unused'
+            ? 'contactPreferences.contactReach.sheet.switchOn'
+            : 'common.close'
+        ),
+        negativeButtonText:
+          reach.type === 'unused' ? t('common.close') : undefined,
+      }).pipe(
+        Effect.tap((confirmed) => {
+          if (confirmed && reach.type === 'unused') setSelected(true)
+        })
+      )
+    )
+  }
   const contactTextColor = isSelected
     ? '$foregroundPrimary'
     : '$foregroundTertiary'
@@ -47,50 +110,43 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
 
   return (
     <XStack testID="@contactItem" ai="center" gap="$3" py="$4" px="$2">
-      <Stack
-        width="$9"
-        height="$9"
-        borderRadius="$2.5"
-        borderWidth="$0.5"
-        borderColor="$backgroundSecondary"
-        overflow="hidden"
+      <Pressable
+        style={{flex: 1}}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        onPress={showDetails}
       >
-        <ContactPictureImage
-          contactId={nonUniqueContactId}
-          width={avatarSize}
-          height={avatarSize}
-          borderRadius="$2.5"
-          objectFit="cover"
-          grayscale={!isSelected}
-          fallback={
-            <UserImagePlaceholder
-              size={avatarSize}
-              borderRadius={0}
-              grayscale={!isSelected}
-            />
-          }
-        />
-      </Stack>
-      <Stack f={1} gap="$1" minWidth={0}>
-        <Typography
-          variant="descriptionBold"
-          color={contactTextColor}
-          numberOfLines={1}
-        >
-          {name}
-        </Typography>
-        <Typography
-          testID="@contactItem/normalizedNumber"
-          variant="micro"
-          color={contactNumberColor}
-          numberOfLines={1}
-        >
-          {getInternationalPhoneNumber(normalizedNumber)}
-        </Typography>
-      </Stack>
+        <XStack ai="center" gap="$3">
+          <ContactAvatar contact={contact} selected={isSelected} />
+          <Stack f={1} gap="$1" minWidth={0}>
+            <Typography
+              variant="descriptionBold"
+              color={contactTextColor}
+              numberOfLines={1}
+            >
+              {name}
+            </Typography>
+            <Typography
+              testID="@contactItem/normalizedNumber"
+              variant="micro"
+              color={contactNumberColor}
+              numberOfLines={1}
+            >
+              {internationalNumber}
+            </Typography>
+            {count > 0 ? (
+              <ReachLabel
+                label={reachLabel}
+                tone={isLoss ? 'loss' : 'neutral'}
+              />
+            ) : null}
+          </Stack>
+        </XStack>
+      </Pressable>
       <XStack gap="$2" ai="center">
         <IconButton
           testID="@contactItem/edit"
+          aria-label={t('addContactDialog.editContact')}
           backgroundColor="$backgroundTertiary"
           onPress={() => {
             navigation.navigate('AddNewContact', {

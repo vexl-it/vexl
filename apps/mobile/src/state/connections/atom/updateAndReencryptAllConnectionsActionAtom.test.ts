@@ -51,12 +51,17 @@ it.each([
   async (_, fetch, fetchedConnections) => {
     mockFetchGraph.mockReturnValue(fetch)
     const store = createStore()
+    const onConnectionsRefresh = jest.fn()
     await Effect.runPromise(
       store.set(updateAndReencryptAllConnectionsActionAtom, {
         isInBackground: true,
+        onConnectionsRefresh,
       })
     )
     expect(mockFetchGraph).toHaveBeenCalledTimes(1)
+    expect(onConnectionsRefresh).toHaveBeenCalledWith(
+      Option.isSome(fetchedConnections)
+    )
     for (const action of [
       updateAndReencryptAllOffersConnectionsActionAtom,
       updateAndReencryptAllNotesConnectionsActionAtom,

@@ -1,5 +1,6 @@
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
 import {
@@ -13,6 +14,7 @@ import {HashMap, Schema} from 'effect'
 
 export const ConnectionsState = Schema.Struct({
   lastUpdate: UnixMilliseconds,
+  syncedContactHashes: Schema.optional(Schema.ReadonlySet(HashedPhoneNumber)),
   firstLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
   secondLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
   commonFriends: CommonConnectionsForUsers,

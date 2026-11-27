@@ -1,5 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect'
+import {Effect, Fiber} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {resolveAllContactsAsSeenActionAtom} from '../../../../../state/contacts/atom/contactsStore'
@@ -12,8 +12,16 @@ export default function useContactListSelectLifecycle(): StoredContactWithComput
     importContactsFromPhoneActionAtom,
     syncDefaultSelectedContactsActionAtom,
     normalizedContactsAtom,
+    loadOfferStatsActionAtom,
   } = useMolecule(contactSelectMolecule)
   const normalizedContacts = useAtomValue(normalizedContactsAtom)
+  const loadOfferStats = useSetAtom(loadOfferStatsActionAtom)
+  useEffect(() => {
+    const fiber = Effect.runFork(loadOfferStats())
+    return () => {
+      Effect.runFork(Fiber.interrupt(fiber))
+    }
+  }, [loadOfferStats])
   const resolveAllContactsAsSeen = useSetAtom(
     resolveAllContactsAsSeenActionAtom
   )

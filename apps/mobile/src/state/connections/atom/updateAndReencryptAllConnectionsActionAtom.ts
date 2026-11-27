@@ -1,4 +1,4 @@
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {atom, type ExtractAtomArgs} from 'jotai'
 import {fetchConnectionsActionAtom} from './connectionStateAtom'
 import {updateAndReencryptAllNotesConnectionsActionAtom} from './noteToConnectionsAtom'
@@ -22,11 +22,13 @@ export const updateAndReencryptAllConnectionsActionAtom = atom(
       onOfferProgress,
       onNoteProgress,
       acceptEmptyGraph,
+      onConnectionsRefresh,
     }: {
       isInBackground?: boolean
       onOfferProgress?: OffersParams['onProgres']
       onNoteProgress?: NotesParams['onProgres']
       acceptEmptyGraph?: boolean
+      onConnectionsRefresh?: (succeeded: boolean) => void
     }
   ): Effect.Effect<void> =>
     Effect.gen(function* (_) {
@@ -48,5 +50,6 @@ export const updateAndReencryptAllConnectionsActionAtom = atom(
           fetchedConnections,
         })
       )
+      onConnectionsRefresh?.(Option.isSome(fetchedConnections))
     })
 )

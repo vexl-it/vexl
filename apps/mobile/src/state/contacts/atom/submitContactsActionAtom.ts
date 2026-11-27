@@ -59,6 +59,7 @@ type SubmitContactsActionParams = {
   readonly manageLoadingOverlay?: boolean
   readonly showContactImportProgressDialog?: boolean
   readonly acceptEmptyGraph?: boolean
+  readonly onConnectionsRefresh?: (succeeded: boolean) => void
 } & ContactsImportSource
 
 type SubmitContactsResult =
@@ -565,11 +566,13 @@ const syncNetworkAfterContactsImportActionAtom = atom(
       showContactImportProgressDialog,
       showOfferReencryptionDialog,
       acceptEmptyGraph,
+      onConnectionsRefresh,
     }: {
       readonly manageLoadingOverlay: boolean
       readonly showContactImportProgressDialog: boolean
       readonly showOfferReencryptionDialog: boolean
       readonly acceptEmptyGraph?: boolean
+      readonly onConnectionsRefresh?: (succeeded: boolean) => void
     }
   ) => {
     const {t} = get(translationAtom)
@@ -617,6 +620,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
 
         yield* _(
           set(updateAndReencryptAllConnectionsActionAtom, {
+            onConnectionsRefresh,
             onOfferProgress: ({offerI, totalOffers, progress}) => {
               set(offerProgressModalActionAtoms.showStep, {
                 aggregateProgress: {
@@ -714,6 +718,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
         })
         yield* _(
           set(updateAndReencryptAllConnectionsActionAtom, {
+            onConnectionsRefresh,
             isInBackground: false,
             acceptEmptyGraph,
           })
@@ -775,6 +780,7 @@ export const submitContactsActionAtom = atom(
 
       yield* _(
         set(syncNetworkAfterContactsImportActionAtom, {
+          onConnectionsRefresh: params.onConnectionsRefresh,
           manageLoadingOverlay,
           showContactImportProgressDialog,
           showOfferReencryptionDialog: params.showOfferReencryptionDialog,

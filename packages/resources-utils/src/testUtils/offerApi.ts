@@ -7,6 +7,7 @@ export function createTestOfferApi(
   const unusedApiCall = (): Effect.Effect<never> =>
     Effect.die('Unexpected API call')
   return {
+    getOfferStats: unusedApiCall,
     createPrivatePart: unusedApiCall,
     deletePrivatePart: unusedApiCall,
     getOffersForMeModifiedOrCreatedAfterPaginated: unusedApiCall,

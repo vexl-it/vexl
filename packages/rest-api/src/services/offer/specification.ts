@@ -47,6 +47,7 @@ import {
   UpdateOfferResponse,
 } from './contracts'
 import {NotesApiGroup} from './notesSpecification'
+import {OfferStatsResponse} from './offerStats'
 
 export const GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
   HttpApiEndpoint.get(
@@ -200,7 +201,16 @@ export const ReportClubOfferEndpoint = HttpApiEndpoint.post(
   .addError(NotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 10)
 
+export const GetOfferStatsEndpoint = HttpApiEndpoint.get(
+  'getOfferStats',
+  '/offers/stats'
+)
+  .annotate(OpenApi.Summary, 'Get active offer counts per country prefix')
+  .addSuccess(OfferStatsResponse)
+  .annotate(MaxExpectedDailyCall, 100)
+
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
+  .add(GetOfferStatsEndpoint)
   .add(GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint)
   .add(GetClubOffersForMeModifiedOrCreatedAfterPaginatedEndpoint)
   .add(CreateNewOfferEndpoint)

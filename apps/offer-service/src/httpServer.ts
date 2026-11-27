@@ -28,6 +28,7 @@ import {createPrivatePart} from './routes/createPrivatePart'
 import {deleteOffer} from './routes/deleteOffer'
 import {deletePrivatePart} from './routes/deletePrivatePart'
 import {getClubOffersForMeModifiedOrCreatedAfterPaginated} from './routes/getClubOffersForMeModifiedOrCreatedAfterPaginated'
+import {getOfferStats} from './routes/getOfferStats'
 import {getOffersForMeModifiedOrCreatedAfterPaginated} from './routes/getOffersForMeModifiedOrCreatedAfterPaginated'
 import {getRemovedClubOffers} from './routes/getRemovedClubOffers'
 import {getRemovedOffers} from './routes/getRemovedOffers'
@@ -46,9 +47,11 @@ import {refreshOffer} from './routes/refreshOffer'
 import {reportClubOffer} from './routes/reportClubOffer'
 import {reportOffer} from './routes/reportOffer'
 import {updateOffer} from './routes/updateOffer'
+import {OfferStatsService} from './utils/offerStats'
 
 const RootGroupLive = HttpApiBuilder.group(OfferApiSpecification, 'root', (h) =>
   h
+    .handle('getOfferStats', getOfferStats)
     .handle('createNewOffer', createNewOffer)
     .handle('createPrivatePart', createPrivatePart)
     .handle('deleteOffer', deleteOffer)
@@ -121,6 +124,7 @@ export const HttpServerLive = Layer.empty.pipe(
   Layer.provideMerge(CleanupWorkersLayer),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(healthServerLayer({port: healthServerPortConfig})),
+  Layer.provideMerge(OfferStatsService.Live),
   Layer.provideMerge(OfferDbService.Live),
   Layer.provideMerge(NoteDbService.Live),
   Layer.provideMerge(DbLayer),

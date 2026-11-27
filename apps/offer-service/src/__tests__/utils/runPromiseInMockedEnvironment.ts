@@ -21,6 +21,7 @@ import {NoteDbService} from '../../db/NoteDbService'
 import {OfferDbService} from '../../db/OfferDbService'
 import DbLayer from '../../db/layer'
 import {OfferApiLive} from '../../httpServer'
+import {OfferStatsService} from '../../utils/offerStats'
 
 export type MockedContexts =
   | RedisService
@@ -32,6 +33,7 @@ export type MockedContexts =
   | HttpClient
   | TestRequestHeaders
   | RateLimitingService
+  | OfferStatsService
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
@@ -45,6 +47,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),
+  Layer.provideMerge(OfferStatsService.Live),
   Layer.provideMerge(OfferDbService.Live),
   Layer.provideMerge(NoteDbService.Live),
   Layer.provideMerge(mockedRateLimitingLayer),
